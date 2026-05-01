@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -462,57 +462,67 @@ const MASTER_SISWA = [
             setTimeout(() => toast.remove(), 3000);
         }
 
-        async function startScanner() {
+       async function startScanner() {
+    console.log("Mencoba akses hardware...");
     const scn = new Html5Qrcode("reader");
-    const config = { fps: 10, qrbox: 250 };
-
+    
     try {
         const devices = await Html5Qrcode.getCameras();
         if (devices && devices.length > 0) {
-            // Pilih kamera belakang jika ada, kalau nggak pilih yang pertama
+            // Logika pilih kamera belakang buat HP, kamera utama buat Laptop
             const backCam = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear'));
             const cameraId = backCam ? backCam.id : devices[0].id;
             
-            await scn.start(cameraId, config, onScan);
+            await scn.start(cameraId, { fps: 10, qrbox: 250 }, onScan);
+            
             document.getElementById('status-dot').className = "w-2 h-2 bg-teal-500 rounded-full animate-ping";
             document.getElementById('status-text').innerText = "Active";
+            console.log("Scanner Berhasil Aktif");
         } else {
-            document.getElementById('status-text').innerText = "No Camera Found";
+            document.getElementById('status-text').innerText = "No Camera";
         }
     } catch (err) {
-        console.error("Scanner Error:", err);
-        document.getElementById('status-text').innerText = "Permission Denied";
+        console.error("Gagal total:", err);
+        document.getElementById('status-text').innerText = "Camera Error";
     }
 }
 
-// --- GANTI WINDOW.ONLOAD PUNYA LO DENGAN INI ---
+// REVISI WINDOW ONLOAD (URUTAN EKSEKUSI)
 window.onload = async () => {
-    // Inisialisasi Firebase tetap seperti biasa
+    console.log("Sistem Dimulai...");
+    
+    // 1. Inisialisasi Firebase
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
     
+    // 2. Setup Tampilan Dasar
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { 
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+    });
+    lucide.createIcons();
+
+    // 3. Login & Load Data
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            console.log("Auth Berhasil, Loading Data...");
             onSnapshot(collection(db, 'absensi_sholat'), (s) => { 
                 currentAbsensiData = s.docs.map(d => d.data()); 
                 render(); 
             });
             fetchJadwal();
+            
+            // 4. BARU JALANKAN SCANNER SETELAH SEMUA SIAP
+            setTimeout(() => {
+                startScanner();
+            }, 1000); // Kasih jeda 1 detik buat browser 'napas'
+            
         } else { 
+            console.log("Mencoba Login Anonim...");
             signInAnonymously(auth); 
         }
     });
 
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { 
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
-    });
-    
-    lucide.createIcons();
-    
-    // Panggil fungsi scanner baru di sini
-    startScanner();
-    
     setInterval(updateSesi, 60000);
 };
 
