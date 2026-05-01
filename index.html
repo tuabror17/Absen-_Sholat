@@ -134,6 +134,13 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
     </style>
 </head>
 <body>
@@ -227,6 +234,18 @@
                 </div>
             </div>
         </div>
+<div class="flex justify-between items-center mb-4">
+    <h3 class="text-[10px] font-black tracking-widest text-teal-400 uppercase">Daftar Siswa</h3>
+    <div class="flex gap-2">
+        <!-- Tombol Baru -->
+        <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 hover:text-red-300 transition uppercase">
+            Clear History
+        </button>
+        <button onclick="downloadExcel()" class="text-[9px] font-bold text-slate-400 hover:text-white transition uppercase">
+            Unduh Excel
+        </button>
+    </div>
+</div>
 
         <!-- SISI KANAN (SCANNER) -->
         <div class="right-panel">
@@ -258,7 +277,7 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot,query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -407,35 +426,67 @@
         } catch (e) { console.error(e); }
     }
 
-    // 4. DASHBOARD RENDER
-    function renderDashboard() {
-        const active = getSesiAktif();
-        const today = new Date().toISOString().split('T')[0];
-        const statsList = document.getElementById('stats-list');
-        if (!statsList) return;
+window.clearHistory = async () => {
+    if (!confirm("Hapus semua data absensi hari ini? Tindakan ini gak bisa di-undo, Broo!")) return;
 
-        if (!active) {
-            statsList.innerHTML = `<p class="text-center text-slate-500 py-10">Menunggu Waktu Sholat</p>`;
-            return;
-        }
-
-        let h = 0, t = 0, m = 0;
-        statsList.innerHTML = MASTER_SISWA.map(s => {
-            const data = currentAbsensiData.find(d => d.student_id === s.id && d.tanggal === today);
-            const status = data ? (data[`status_${active.id}`] || "BELUM ABSEN") : "BELUM ABSEN";
-            if (status === "HADIR") h++; else if (status === "TERLAMBAT") t++; else m++;
-            const color = status === "HADIR" ? "text-teal-400" : (status === "TERLAMBAT" ? "text-yellow-400" : "text-slate-500");
-            return `<div class="glass-card p-3 rounded-xl flex justify-between items-center border border-white/5">
-                <p class="text-[11px] font-bold text-white">${s.nama}</p>
-                <p class="text-[8px] font-black ${color} uppercase">${status}</p>
-            </div>`;
-        }).join('');
-
-        document.getElementById('stat-hadir').innerText = h;
-        document.getElementById('stat-telat').innerText = t;
-        document.getElementById('stat-mangkir').innerText = m;
+    const today = new Date().toISOString().split('T')[0];
+    const q = query(collection(db, 'absensi_sholat'), where("tanggal", "==", today));
+    
+    try {
+        const querySnapshot = await getDocs(q);
+        const deletePromises = querySnapshot.docs.map(d => deleteDoc(d.ref));
+        await Promise.all(deletePromises);
+        alert("History hari ini bersih, Broo!");
+    } catch (e) {
+        console.error("Gagal hapus:", e);
+        alert("Gagal hapus data, cek koneksi atau permission!");
     }
+};
 
+    // 4. DASHBOARD RENDER
+   function renderDashboard() {
+    const active = getSesiAktif();
+    const today = new Date().toISOString().split('T')[0];
+    
+    // --- LOGIC UTAMA DAFTAR SISWA (Eksisting) ---
+    // ... (kode lo yang nampilin daftar semua siswa tetap di sini) ...
+
+    // --- LOGIC PANEL HISTORY TERAKHIR (SISIPKAN DI SINI) ---
+    const historyList = document.getElementById('history-list');
+    if (historyList) {
+        // 1. Filter hanya data hari ini yang punya timestamp (last_update)
+        // 2. Sort dari yang paling baru (descending)
+        // 3. Ambil 3 orang terakhir saja
+        const recentLogs = [...currentAbsensiData]
+            .filter(d => d.tanggal === today && d.last_update)
+            .sort((a, b) => b.last_update - a.last_update)
+            .slice(0, 3);
+
+        if (recentLogs.length > 0) {
+            historyList.innerHTML = recentLogs.map(log => {
+                // Ambil jam sesuai sesi aktif saat ini
+                const jamAbsen = log[`jam_${active?.id}`] || "Baru saja";
+                
+                return `
+                    <div class="flex items-center justify-between p-2 bg-white/5 rounded-lg border-l-2 border-teal-500 animate-fade-in">
+                        <div class="flex flex-col">
+                            <p class="text-[10px] font-bold text-white uppercase tracking-tight">${log.nama}</p>
+                            <p class="text-[8px] text-slate-400 uppercase tracking-tighter">
+                                ${active?.label || 'Absen'} • ${jamAbsen}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1 bg-teal-500/10 px-2 py-1 rounded border border-teal-500/20">
+                            <span class="w-1 h-1 bg-teal-400 rounded-full"></span>
+                            <p class="text-[7px] font-black text-teal-400">BERHASIL</p>
+                        </div>
+                    </div>`;
+            }).join('');
+        } else {
+            // Balikin ke state kosong kalau belum ada yang scan
+            historyList.innerHTML = `<p class="text-[9px] text-slate-500 text-center py-4 uppercase tracking-widest italic">Belum ada aktivitas</p>`;
+        }
+    }
+}
     // 5. BOOTSTRAP (ALUR STARTUP)
     window.onload = async () => {
         updateDate(); // Jalankan jam dulu biar user nggak panik
