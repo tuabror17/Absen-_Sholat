@@ -256,313 +256,178 @@
         </div>
     </div>
 
-    cript type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // CONFIG LO SUDAH TERPASANG, BROO!
-        const firebaseConfig = {
-            apiKey: "AIzaSyD1GjekEZ9ygmK9nh2p4sGyuTylByWztho",
-            authDomain: "absen-sholat-7d00d.firebaseapp.com",
-            projectId: "absen-sholat-7d00d",
-            storageBucket: "absen-sholat-7d00d.firebasestorage.app",
-            messagingSenderId: "592228197757",
-            appId: "1:592228197757:web:19c5965d714a1b9e66d814"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyD1GjekEZ9ygmK9nh2p4sGyuTylByWztho",
+        authDomain: "absen-sholat-7d00d.firebaseapp.com",
+        projectId: "absen-sholat-7d00d",
+        storageBucket: "absen-sholat-7d00d.firebasestorage.app",
+        messagingSenderId: "592228197757",
+        appId: "1:592228197757:web:19c5965d714a1b9e66d814"
+    };
 
-const MASTER_SISWA = [
-            { id: "1001", nama: "Ahmad Fauzi" },
-            { id: "1002", nama: "Siti Aminah" },
-            { id: "1003", nama: "Zulkifli Mansur" },
-            { id: "1004", nama: "Rizky Ramadhan" },
-            { id: "1005", nama: "Budi Santoso" },
-            { id: "1006", nama: "Laila Majnun" }
-        ];
+    const MASTER_SISWA = [
+        { id: "1001", nama: "Ahmad Fauzi" },
+        { id: "1002", nama: "Siti Aminah" },
+        { id: "1003", nama: "Zulkifli Mansur" },
+        { id: "1004", nama: "Rizky Ramadhan" },
+        { id: "1005", nama: "Budi Santoso" },
+        { id: "1006", nama: "Laila Majnun" }
+    ];
 
-        let auth, db, currentUser, jadwalHariIni, currentAbsensiData = [];
-        let html5QrCode = null;
+    let auth, db, currentUser, jadwalHariIni, currentAbsensiData = [];
+    let html5QrCode = null;
 
-        // Koordinat Tarogong Kidul, Garut
-        const LAT = -7.2144;
-        const LNG = 107.8883;
+    // 1. TAMPILAN JAM (Langsung jalan, gak nunggu Firebase)
+    const updateDate = () => {
+        const el = document.getElementById('current-date');
+        if (el) el.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    };
 
-        async function fetchJadwal() {
-            try {
-                // Menggunakan latitude & longitude untuk Tarogong Kidul agar presisi
-                // Method 20 = Kemenag RI
-                const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=Tarogong%20Kidul,%20Garut,%20Indonesia&method=20`);
-                const json = await res.json();
-                jadwalHariIni = json.data.timings;
-                const keys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-                keys.forEach(k => {
-                    const el = document.getElementById(`time-${k.toLowerCase()}`);
-                    if (el) el.innerText = jadwalHariIni[k];
-                });
-                updateActiveSesi();
-            } catch (e) { 
-                console.error("Prayer API error:", e);
-                // Fallback jika API address gagal, pakai koordinat mentah
-                try {
-                    const res2 = await fetch(`https://api.aladhan.com/v1/timings?latitude=${LAT}&longitude=${LNG}&method=20`);
-                    const json2 = await res2.json();
-                    jadwalHariIni = json2.data.timings;
-                } catch(e2) {}
-            }
-        }
-
-        function getSesiAktif() {
-            if (!jadwalHariIni) return null;
-            const now = new Date();
-            const nowMins = now.getHours() * 60 + now.getMinutes();
-            const parse = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-            
-            const sesi = [
-                { id: 'fajr', label: 'Subuh', start: jadwalHariIni.Fajr, end: "06:30" },
-                { id: 'dhuhr', label: 'Dzuhur', start: jadwalHariIni.Dhuhr, end: "14:30" },
-                { id: 'asr', label: 'Ashar', start: jadwalHariIni.Asr, end: "17:45" },
-                { id: 'maghrib', label: 'Maghrib', start: jadwalHariIni.Maghrib, end: "19:00" },
-                { id: 'isha', label: 'Isya', start: jadwalHariIni.Isha, end: "21:00" }
-            ];
-
-            for (const s of sesi) {
-                if (nowMins >= parse(s.start) && nowMins <= parse(s.end)) {
-                    const isLate = nowMins > (parse(s.start) + 15);
-                    return { ...s, isLate };
-                }
-            }
-            return null;
-        }
-
-        function updateActiveSesi() {
-            const active = getSesiAktif();
-            ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach(s => {
-                const el = document.getElementById(`sesi-${s}`);
-                el?.classList.toggle('active-neon', active && s === active.id);
+    // 2. JADWAL SHOLAT
+    async function fetchJadwal() {
+        try {
+            const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=Tarogong%20Kidul,%20Garut,%20Indonesia&method=20`);
+            const json = await res.json();
+            jadwalHariIni = json.data.timings;
+            const keys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            keys.forEach(k => {
+                const el = document.getElementById(`time-${k.toLowerCase()}`);
+                if (el) el.innerText = jadwalHariIni[k];
             });
-            document.getElementById('current-sesi-name').innerText = active ? `(${active.label})` : "";
-            renderDashboard();
-        }
-
-        async function onScanSuccess(decodedText) {
-            if (!currentUser) return;
-            const cleanId = decodedText.trim();
-            const student = MASTER_SISWA.find(s => s.id === cleanId);
-            const sesi = getSesiAktif();
-
-            if (!student) {
-                showToast("ID TIDAK TERDAFTAR", "bg-red-500/80");
-                return;
-            }
-
-            if (!sesi) {
-                showToast("BELUM WAKTUNYA SHOLAT", "bg-yellow-500/80");
-                return;
-            }
-
-            const today = new Date().toISOString().split('T')[0];
-            const docId = `${today}_${cleanId}`;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'absensi', docId);
-
-            try {
-                await setDoc(docRef, {
-                    student_id: cleanId,
-                    nama: student.nama,
-                    tanggal: today,
-                    [`jam_${sesi.id}`]: new Date().toLocaleTimeString('id-ID'),
-                    [`status_${sesi.id}`]: sesi.isLate ? "TERLAMBAT" : "HADIR",
-                    last_update: Date.now()
-                }, { merge: true });
-
-                showSuccessPopup(student.nama, sesi.label, sesi.isLate ? "TERLAMBAT" : "HADIR");
-            } catch (e) {
-                console.error(e);
-                showToast("Gagal Simpan Data", "bg-red-600");
-            }
-        }
-
-        function showSuccessPopup(nama, sesi, status) {
-            const box = document.getElementById('info-box');
-            document.getElementById('info-name').innerText = nama;
-            document.getElementById('info-detail').innerText = `${sesi} • ${status}`;
-            box.classList.remove('hidden');
-            setTimeout(() => box.classList.add('hidden'), 4000);
-        }
-
-        function renderDashboard() {
-            const active = getSesiAktif();
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Log Kehadiran
-            if (!active) {
-                document.getElementById('stats-list').innerHTML = `<div class="text-center py-10 text-slate-500 text-[10px] uppercase font-bold tracking-widest">Menunggu Waktu Sholat</div>`;
-                document.getElementById('stat-hadir').innerText = 0;
-                document.getElementById('stat-telat').innerText = 0;
-                document.getElementById('stat-mangkir').innerText = 0;
-            } else {
-                let h = 0, t = 0, m = 0;
-                const html = MASTER_SISWA.map(s => {
-                    const data = currentAbsensiData.find(d => d.student_id === s.id && d.tanggal === today);
-                    const status = data ? (data[`status_${active.id}`] || "BELUM ABSEN") : "BELUM ABSEN";
-                    
-                    if (status === "HADIR") h++; 
-                    else if (status === "TERLAMBAT") t++; 
-                    else m++;
-
-                    const statusColor = status === "HADIR" ? "text-teal-400" : (status === "TERLAMBAT" ? "text-yellow-400" : "text-slate-500");
-
-                    return `
-                        <div class="glass-card p-3 rounded-xl flex justify-between items-center border border-white/5">
-                            <p class="text-[11px] font-bold text-white">${s.nama}</p>
-                            <p class="text-[8px] font-black ${statusColor} uppercase tracking-widest">${status}</p>
-                        </div>
-                    `;
-                }).join('');
-
-                document.getElementById('stat-hadir').innerText = h;
-                document.getElementById('stat-telat').innerText = t;
-                document.getElementById('stat-mangkir').innerText = m;
-                document.getElementById('stats-list').innerHTML = html;
-            }
-
-            // Histori Baru Saja Absen
-            const recentLogs = [...currentAbsensiData]
-                .filter(d => d.tanggal === today && d.last_update)
-                .sort((a, b) => b.last_update - a.last_update)
-                .slice(0, 5);
-
-            if (recentLogs.length > 0) {
-                const historyHtml = recentLogs.map(log => {
-                    const latestJam = Object.keys(log)
-                        .filter(k => k.startsWith('jam_'))
-                        .map(k => log[k])
-                        .pop() || '--:--';
-
-                    return `
-                        <div class="history-item flex items-center justify-between bg-teal-500/10 border border-teal-500/20 px-4 py-2 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-1.5 h-1.5 bg-teal-500 rounded-full"></div>
-                                <p class="text-xs font-bold text-slate-200">${log.nama}</p>
-                            </div>
-                            <p class="text-[9px] font-black text-teal-400 tabular-nums">${latestJam}</p>
-                        </div>
-                    `;
-                }).join('');
-                document.getElementById('history-list').innerHTML = historyHtml;
-            } else {
-                document.getElementById('history-list').innerHTML = `<p class="text-[9px] text-slate-500 text-center py-4 uppercase tracking-widest italic">Belum ada aktivitas</p>`;
-            }
-        }
-
-        function showToast(msg, color) {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-10 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-3 rounded-full text-xs font-bold z-50 shadow-2xl animate-pulse`;
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-       async function startScanner() {
-    console.log("Mencoba akses hardware...");
-    const scn = new Html5Qrcode("reader");
-    
-    try {
-        const devices = await Html5Qrcode.getCameras();
-        if (devices && devices.length > 0) {
-            // Logika pilih kamera belakang buat HP, kamera utama buat Laptop
-            const backCam = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear'));
-            const cameraId = backCam ? backCam.id : devices[0].id;
-            
-            await scn.start(cameraId, { fps: 10, qrbox: 250 }, onScan);
-            
-            document.getElementById('status-dot').className = "w-2 h-2 bg-teal-500 rounded-full animate-ping";
-            document.getElementById('status-text').innerText = "Active";
-            console.log("Scanner Berhasil Aktif");
-        } else {
-            document.getElementById('status-text').innerText = "No Camera";
-        }
-    } catch (err) {
-        console.error("Gagal total:", err);
-        document.getElementById('status-text').innerText = "Camera Error";
+            updateActiveSesi();
+        } catch (e) { console.error("API Error:", e); }
     }
-}
 
-// REVISI WINDOW ONLOAD (URUTAN EKSEKUSI)
-window.onload = async () => {
-    console.log("Sistem Dimulai...");
-    
-    // 1. Inisialisasi Firebase
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-    
-    // 2. Setup Tampilan Dasar
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { 
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
-    });
-    lucide.createIcons();
-
-    // 3. Login & Load Data
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Auth Berhasil, Loading Data...");
-            onSnapshot(collection(db, 'absensi_sholat'), (s) => { 
-                currentAbsensiData = s.docs.map(d => d.data()); 
-                render(); 
-            });
-            fetchJadwal();
-            
-            // 4. BARU JALANKAN SCANNER SETELAH SEMUA SIAP
-            setTimeout(() => {
-                startScanner();
-            }, 1000); // Kasih jeda 1 detik buat browser 'napas'
-            
-        } else { 
-            console.log("Mencoba Login Anonim...");
-            signInAnonymously(auth); 
-        }
-    });
-
-    setInterval(updateSesi, 60000);
-};
-
-        window.exportData = () => {
-            const ws = XLSX.utils.json_to_sheet(currentAbsensiData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Absensi");
-            XLSX.writeFile(wb, `Laporan_Absensi_Sholat_${new Date().toLocaleDateString()}.xlsx`);
-        };
-
-        const init = async () => {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+    function getSesiAktif() {
+        if (!jadwalHariIni) return null;
+        const now = new Date();
+        const nowMins = now.getHours() * 60 + now.getMinutes();
+        const parse = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+        const sesi = [
+            { id: 'fajr', label: 'Subuh', start: jadwalHariIni.Fajr, end: "06:30" },
+            { id: 'dhuhr', label: 'Dzuhur', start: jadwalHariIni.Dhuhr, end: "14:30" },
+            { id: 'asr', label: 'Ashar', start: jadwalHariIni.Asr, end: "17:45" },
+            { id: 'maghrib', label: 'Maghrib', start: jadwalHariIni.Maghrib, end: "19:00" },
+            { id: 'isha', label: 'Isya', start: jadwalHariIni.Isha, end: "21:00" }
+        ];
+        for (const s of sesi) {
+            if (nowMins >= parse(s.start) && nowMins <= parse(s.end)) {
+                return { ...s, isLate: nowMins > (parse(s.start) + 15) };
             }
+        }
+        return null;
+    }
 
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user) {
-                    onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'absensi'), (snapshot) => {
-                        currentAbsensiData = snapshot.docs.map(doc => doc.data());
-                        renderDashboard();
-                    }, (err) => console.error(err));
-                    fetchJadwal();
-                }
-            });
+    function updateActiveSesi() {
+        const active = getSesiAktif();
+        ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach(s => {
+            const el = document.getElementById(`sesi-${s}`);
+            el?.classList.toggle('active-neon', active && s === active.id);
+        });
+        const nameEl = document.getElementById('current-sesi-name');
+        if (nameEl) nameEl.innerText = active ? `(${active.label})` : "";
+        renderDashboard();
+    }
 
-            document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('camera-status').onclick = startScanner;
-            lucide.createIcons();
-            startScanner();
-            setInterval(updateActiveSesi, 60000);
-        };
+    // 3. SCANNER LOGIC
+    async function startScanner() {
+        console.log("Mencoba kamera...");
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        
+        try {
+            const devices = await Html5Qrcode.getCameras();
+            if (devices && devices.length > 0) {
+                const backCam = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear'));
+                const cameraId = backCam ? backCam.id : devices[0].id;
+                await html5QrCode.start(cameraId, { fps: 10, qrbox: 250 }, onScanSuccess);
+                document.getElementById('status-dot').className = "w-2 h-2 bg-teal-500 rounded-full animate-ping";
+                document.getElementById('status-text').innerText = "Active";
+            }
+        } catch (err) {
+            console.error("Camera Error:", err);
+            document.getElementById('status-text').innerText = "Error";
+        }
+    }
 
-        window.onload = init;
-    </script>
+    async function onScanSuccess(decodedText) {
+        const student = MASTER_SISWA.find(s => s.id === decodedText.trim());
+        const sesi = getSesiAktif();
+        if (!student || !sesi) return alert(!student ? "ID Salah" : "Belum Waktu Sholat");
+
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            await setDoc(doc(db, 'absensi_sholat', `${today}_${student.id}`), {
+                student_id: student.id,
+                nama: student.nama,
+                tanggal: today,
+                [`jam_${sesi.id}`]: new Date().toLocaleTimeString('id-ID'),
+                [`status_${sesi.id}`]: sesi.isLate ? "TERLAMBAT" : "HADIR",
+                last_update: Date.now()
+            }, { merge: true });
+            alert(`Berhasil: ${student.nama}`);
+        } catch (e) { console.error(e); }
+    }
+
+    // 4. DASHBOARD RENDER
+    function renderDashboard() {
+        const active = getSesiAktif();
+        const today = new Date().toISOString().split('T')[0];
+        const statsList = document.getElementById('stats-list');
+        if (!statsList) return;
+
+        if (!active) {
+            statsList.innerHTML = `<p class="text-center text-slate-500 py-10">Menunggu Waktu Sholat</p>`;
+            return;
+        }
+
+        let h = 0, t = 0, m = 0;
+        statsList.innerHTML = MASTER_SISWA.map(s => {
+            const data = currentAbsensiData.find(d => d.student_id === s.id && d.tanggal === today);
+            const status = data ? (data[`status_${active.id}`] || "BELUM ABSEN") : "BELUM ABSEN";
+            if (status === "HADIR") h++; else if (status === "TERLAMBAT") t++; else m++;
+            const color = status === "HADIR" ? "text-teal-400" : (status === "TERLAMBAT" ? "text-yellow-400" : "text-slate-500");
+            return `<div class="glass-card p-3 rounded-xl flex justify-between items-center border border-white/5">
+                <p class="text-[11px] font-bold text-white">${s.nama}</p>
+                <p class="text-[8px] font-black ${color} uppercase">${status}</p>
+            </div>`;
+        }).join('');
+
+        document.getElementById('stat-hadir').innerText = h;
+        document.getElementById('stat-telat').innerText = t;
+        document.getElementById('stat-mangkir').innerText = m;
+    }
+
+    // 5. BOOTSTRAP (ALUR STARTUP)
+    window.onload = async () => {
+        updateDate(); // Jalankan jam dulu biar user nggak panik
+        
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                console.log("Login OK");
+                fetchJadwal();
+                onSnapshot(collection(db, 'absensi_sholat'), (snap) => {
+                    currentAbsensiData = snap.docs.map(d => d.data());
+                    renderDashboard();
+                });
+                setTimeout(startScanner, 1000);
+            } else {
+                signInAnonymously(auth);
+            }
+        });
+
+        lucide.createIcons();
+        setInterval(updateActiveSesi, 60000);
+    };
+</script>
 </body>
 </html>
