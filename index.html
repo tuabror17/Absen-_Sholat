@@ -336,23 +336,57 @@
 
     // 3. SCANNER LOGIC
     async function startScanner() {
-        console.log("Mencoba kamera...");
-        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        
-        try {
-            const devices = await Html5Qrcode.getCameras();
-            if (devices && devices.length > 0) {
-                const backCam = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear'));
-                const cameraId = backCam ? backCam.id : devices[0].id;
-                await html5QrCode.start(cameraId, { fps: 10, qrbox: 250 }, onScanSuccess);
-                document.getElementById('status-dot').className = "w-2 h-2 bg-teal-500 rounded-full animate-ping";
-                document.getElementById('status-text').innerText = "Active";
-            }
-        } catch (err) {
-            console.error("Camera Error:", err);
-            document.getElementById('status-text').innerText = "Error";
+    console.log("Mengoptimalkan kamera...");
+    const readerEl = document.getElementById('reader');
+    if (!readerEl) return;
+
+    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+    
+    // Konfigurasi QR Box dan Video
+    const qrConfig = { 
+        fps: 20, // Naikin fps biar lebih smooth
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+            // Box otomatis membesar: 70% dari area terkecil
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7); 
+            return { width: boxSize, height: boxSize };
+        },
+        aspectRatio: 1.0 // Pakai kotak sempurna (1:1)
+    };
+
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+            const backCam = devices.find(d => 
+                d.label.toLowerCase().includes('back') || 
+                d.label.toLowerCase().includes('rear')
+            );
+            
+            const selectedCameraId = backCam ? backCam.id : devices[0].id;
+
+            await html5QrCode.start(
+                selectedCameraId, 
+                {
+                    ...qrConfig,
+                    // Tambahan config video untuk maksa autofocus dan resolusi
+                    videoConstraints: {
+                        facingMode: "environment",
+                        width: { ideal: 1280 }, // Minta resolusi HD biar fokus tajam
+                        height: { ideal: 720 },
+                        focusMode: "continuous" // Pakai mode fokus terus menerus
+                    }
+                }, 
+                onScanSuccess
+            );
+            
+            document.getElementById('status-dot').className = "w-2 h-2 bg-teal-500 rounded-full animate-ping";
+            document.getElementById('status-text').innerText = "Active";
         }
+    } catch (err) {
+        console.error("Scanner Error:", err);
+        document.getElementById('status-text').innerText = "Failed";
     }
+}
 
     async function onScanSuccess(decodedText) {
         const student = MASTER_SISWA.find(s => s.id === decodedText.trim());
