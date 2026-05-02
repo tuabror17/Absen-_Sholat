@@ -172,45 +172,159 @@
         const TOTAL_SISWA = 137;
 
         // DATABASE SISWA (Disederhanakan untuk efisiensi file, pastikan ID sesuai CSV)
-        const MASTER_SISWA = [
-            { id: "3127465766", nama: "AFKHAR MUHAMAD FIRDAUS NUGRAHA", kelas: "7A" },
-            { id: "0133122809", nama: "Ahmad Mukhlis Dzaki Sopian", kelas: "7A" },
-            { id: "3135691911", nama: "AKBAR CHAEDAR AL BAIHAQI", kelas: "7A" },
-            { id: "0122700074", nama: "ARDIGA DEZAR NOEGRAHA", kelas: "7A" },
-            { id: "0139230548", nama: "Azzam Raditya Ruhiyatna", kelas: "7A" },
-            { id: "3129626322", nama: "Dzaky Rafif Maulana", kelas: "7A" },
-            { id: "3128108675", nama: "Faizal Wildansah", kelas: "7A" },
-            { id: "0137354180", nama: "FAQIH AL FATIH USMAN", kelas: "7A" },
-            { id: "3123211221", nama: "FAUZAN RAFIIANDRA", kelas: "7A" },
-            { id: "0128510991", nama: "Fhaza Ahshanul Muttaqin", kelas: "7A" },
-            { id: "0122183078", nama: "FIKRI ABDULLAH MUTTAQIN", kelas: "7A" },
-            { id: "0127963314", nama: "HADI NUR RAHARJA", kelas: "7A" },
-            { id: "0127779202", nama: "Jamaludin", kelas: "7A" },
-            { id: "0134934068", nama: "M. ATTARIZ ZAHRAN CALIEF", kelas: "7A" },
-            { id: "0134793628", nama: "MAHARDIKA RAFA PUTRA SUNJAYA", kelas: "7A" },
-            { id: "3133196637", nama: "MARCELLO SETIAWAN", kelas: "7A" },
-            { id: "0131454661", nama: "Mu'adz Al Fath", kelas: "7A" },
-            { id: "0131924619", nama: "MUHAMAD ADITYA RAMDANI", kelas: "7A" },
-            { id: "0132338166", nama: "MUHAMAD ALIF MAULANA", kelas: "7A" },
-            { id: "3133959955", nama: "MUHAMMAD ALBI MAULANA", kelas: "7A" },
-            { id: "0126447820", nama: "MUHAMMAD FARHAN MAULANA", kelas: "7A" },
-            { id: "3104010439", nama: "ADAM RAYYAN MAHENDRA", kelas: "10" },
-            { id: "0081841946", nama: "Ahmad Nashirudin Saleh", kelas: "11" },
-            { id: "0107853083", nama: "Alfaz Arva Baihaqi", kelas: "10" },
-            { id: "0116705318", nama: "Ibadu Robbani", kelas: "9C" },
-            { id: "3107302765", nama: "KHAIRUL AZAM RAMADHAN", kelas: "9C" },
-            { id: "0109301030", nama: "Lazuardi Azra Mardiana", kelas: "9C" },
-            { id: "0107857353", nama: "Mifzal Muhammad Nidal", kelas: "9C" },
-            { id: "0117431097", nama: "MUHAMAD PAHRI ALGHIPARI", kelas: "9C" },
-            { id: "0119270443", nama: "MUHAMAD WAFI QINTHARA", kelas: "9C" },
-            { id: "0113717583", nama: "MUHAMMAD FABIAN YAKUB", kelas: "9C" },
-            { id: "0107331827", nama: "MUHAMMAD RAZKA IHSAN MAULUD", kelas: "9C" },
-            { id: "3104895436", nama: "MUHAMMAD RIZKI MUHARAM", kelas: "9C" },
-            { id: "0118235431", nama: "Rizky Amad Maulana", kelas: "9C" },
-            { id: "0117523618", nama: "Shakiel Athaya Juansyah", kelas: "9C" },
-            { id: "0108458728", nama: "SIGIT SASIKIRANA", kelas: "9C" },
-            { id: "0106600474", nama: "SYUJA MUZZAKY AWALLUDIN HILMANSYAH", kelas: "9C" }
-        ];
+        const MASTER_SISWA = {
+    "7A": [
+        { id: "3127465766", nama: "AFKHAR MUHAMAD FIRDAUS NUGRAHA" },
+        { id: "0133122809", nama: "AHMAD MUKHLIS DZAKI SOPIAN" },
+        { id: "3135691911", nama: "AKBAR CHAEDAR AL BAIHAQI" },
+        { id: "0122700074", nama: "ARDIGA DEZAR NOEGRAHA" },
+        { id: "0139230548", nama: "AZZAM RADITYA RUHIYATNA" },
+        { id: "3129626322", nama: "DZAKY RAFIF MAULANA" },
+        { id: "3128108675", nama: "FAIZAL WILDANSAH" },
+        { id: "0137354180", nama: "FAQIH AL FATIH USMAN" },
+        { id: "3123211221", nama: "FAUZAN RAFIIANDRA" },
+        { id: "0128510991", nama: "FHAZA AHSHANUL MUTTAQIN" },
+        { id: "0122183078", nama: "FIKRI ABDULLAH MUTTAQIN" },
+        { id: "0127963314", nama: "HADI NUR RAHARJA" },
+        { id: "0127779202", nama: "JAMALUDIN" },
+        { id: "0134934068", nama: "M. ATTARIZ ZAHRAN CALIEF" },
+        { id: "0134793628", nama: "MAHARDIKA RAFA PUTRA SUNJAYA" },
+        { id: "3133196637", nama: "MARCELLO SETIAWAN" },
+        { id: "0127741871", nama: "MU'ADZ AL FATH GUNAWAN" },
+        { id: "3126133798", nama: "MUHAMAD ASEP SRI BAGJA DININGRAT" },
+        { id: "3133541548", nama: "MUHAMMAD AKBAR PURNAMA" },
+        { id: "0122626485", nama: "MUHAMMAD AZFAR GINANJAR" },
+        { id: "3139820107", nama: "MUHAMMAD AZFAR HAIKAL HAMDANI" },
+        { id: "3122851246", nama: "MUHAMMAD FAIZ ARYA WIJAYA" },
+        { id: "3139451846", nama: "MUHAMMAD FATIH AL FAUZI" },
+        { id: "3126174071", nama: "MUHAMMAD IDZHARULHAQ AL JUNDI" },
+        { id: "0129491039", nama: "MUHAMMAD PUTRA PRATAMA" },
+        { id: "3134828491", nama: "MUHAMMAD RAJIB DARUL FAUZAN" },
+        { id: "0133236649", nama: "MUHAMMAD TSABIT TAQIYYUDDIN" },
+        { id: "3120507435", nama: "MUHAMMAD TSAQIB ANANDA TSANY" },
+        { id: "0122549732", nama: "MUHANDIS FATIH ALMUBAROK" },
+        { id: "0126879388", nama: "NARARYA GANENDRA WINATA" },
+        { id: "0134365381", nama: "NARENDRA NARAYANA MARTANDIA" },
+        { id: "0128867049", nama: "RAYYAN FATHURA AROBI" },
+        { id: "0122102764", nama: "RAZKA HAFIDZ KAMIL" },
+        { id: "0135722918", nama: "RD. MUHAMMAD FATHIR FIRMANSYAH" },
+        { id: "3124761947", nama: "SHAQIL ZHAIN MAKKY" }
+    ],
+    "8A": [
+        { id: "0124858102", nama: "DZAKI AWWALUL RIZKY EL MUSLIM" },
+        { id: "0114758594", nama: "DZAKWAN MAHIB MAKARIM" },
+        { id: "0129097178", nama: "DZIKRI ADZANI AL-KHOLIFI WANDA DINATA" },
+        { id: "0125664453", nama: "FADLI AKBAR GUNAWAN" },
+        { id: "0116570113", nama: "LINGGA KAMIL ALFARISI" },
+        { id: "0121393768", nama: "MUHAMAD AKMAL AL-NAZMI" },
+        { id: "0118906944", nama: "MUHAMAD FAWWAZ YAHYA" },
+        { id: "0114634188", nama: "MUHAMMAD FATHAN AULIA RAHMAN" },
+        { id: "3122651670", nama: "MUHAMMAD RAKHA MAHARDIKA" },
+        { id: "0112265693", nama: "MUHAMMAD TSAQIF ALPHAREZY" },
+        { id: "0112240374", nama: "NADHIEF AQIEELA MUNANDAR" },
+        { id: "0114975160", nama: "NIZAM ALFARIDZI" },
+        { id: "0111701234", nama: "RADIK MUHAMAD RAJABI" },
+        { id: "0112011973", nama: "RAKA AKBAR HERDYTIA" },
+        { id: "0128055933", nama: "RAKA APRIYANTO KUSUMA" },
+        { id: "0116041287", nama: "RAMADHAN IBADURRAHMAN KHAIRUL AZZAM" },
+        { id: "0115169426", nama: "REYHAN BUDI SENTOSA" }
+    ],
+    "8B": [
+        { id: "0127032213", nama: "AKHTAR HARIST ANARGYA" },
+        { id: "0112113790", nama: "ARIQ RASYADAN ALFATH" },
+        { id: "0116424557", nama: "FAAHIM RAZIQI MANIK" },
+        { id: "0128342704", nama: "FAROBI RIZKI HARIS PRIYADI" },
+        { id: "0112711413", nama: "FIZI GHIYATS ALFAFA" },
+        { id: "0126449041", nama: "JIYAADATUL YUZAKI MAULANA H" },
+        { id: "0129871890", nama: "KHOIRUL ALIF TRISNA MUTTAQIN" },
+        { id: "0129292043", nama: "MOCHAMAD FAKHRI PRATAMA" },
+        { id: "3128303154", nama: "MOHAMMAD HASAN ABQORI" },
+        { id: "0112278609", nama: "MUH IRSYAD FAROUQ" },
+        { id: "0124960952", nama: "MUHAMAD MIRZA GHAISAN" },
+        { id: "0128613956", nama: "MUHAMAD NIJAR" },
+        { id: "0123626803", nama: "MUHAMAD RIFKY ALGHIFARY" },
+        { id: "3119418995", nama: "MUHAMMAD NABIL RAFIF GHAISAN" },
+        { id: "0127541673", nama: "RASYA PUTRA KURNIAWAN" },
+        { id: "0118169011", nama: "RIZQY AKBAR FIRDAUZ" },
+        { id: "3111131077", nama: "ZIEDY AURICK EL-SHIRAZY" }
+    ],
+    "9A": [
+        { id: "0118169133", nama: "HAMKA HERIANSYAH PUTRA" },
+        { id: "0107657302", nama: "IRSYAD SYAUQI FATHURRAHMAN" },
+        { id: "0105225915", nama: "KAINAN MUHAMMAD FADIL" },
+        { id: "0109301348", nama: "M. AUFA SABIQ ISKANDAR" },
+        { id: "0108787350", nama: "MOHAMAD FAJRIAN RAMDHAN" },
+        { id: "0113784232", nama: "MUHAMMAD FATHUNA RASYID AL-KINDI" },
+        { id: "0104061999", nama: "MUHAMMAD HAFIZH KAMALUDIN" },
+        { id: "0107788094", nama: "MUHAMMAD ZHAFRAN MU'TASHIM" },
+        { id: "0105483103", nama: "MUSTHAFA BILAL AR RAYAN" },
+        { id: "0101613901", nama: "NAFIS ARSALAN" },
+        { id: "0107140674", nama: "NAZERIL ROSICKY" },
+        { id: "0107930342", nama: "NAZWAN FARID AL HAKIM" },
+        { id: "0103530070", nama: "RADITYA BARIQ AL NADHIR" },
+        { id: "0119541464", nama: "RAIZEL RADITHYA AQILA HELWYN" },
+        { id: "0119636378", nama: "SYAFIQ MUHAMMAD AQIL MUQADDAS" },
+        { id: "0105746124", nama: "TRIYANA DIMAS PRAYOGA" }
+    ],
+    "9C": [
+        { id: "0105585206", nama: "ABIZAR NURON AL KAUTSAR" },
+        { id: "0108771584", nama: "ALFAN FADLI RAMADHAN" },
+        { id: "0105855911", nama: "AQILA SHIDQI ANANTA" },
+        { id: "0113688992", nama: "BANYU PRAGIWAKA" },
+        { id: "0114201950", nama: "CEF KAMAL NUR RAFFI" },
+        { id: "0118631777", nama: "DIHYAH KHALIFA AL MUJTABA" },
+        { id: "0114309152", nama: "FAEYZA RAJENDRA ALFARZANI" },
+        { id: "0115414036", nama: "FAHRIE ADHY HARISSA" },
+        { id: "0116200122", nama: "FAIQ ANANDA GONZALES" },
+        { id: "0114431263", nama: "FAKHRI ABDULLAH MUTTAQIN" },
+        { id: "0106230987", nama: "FASLI FAJAR MUHARAM" },
+        { id: "0106460483", nama: "FATHY NASRULLOH" },
+        { id: "0113827288", nama: "GHAZI ARKAN FAHLEVI" },
+        { id: "0115328980", nama: "HAIDAR DZAKY" },
+        { id: "0116705318", nama: "HELMY MUHAMMAD RABBANI" },
+        { id: "3107302765", nama: "KHAIRUL AZAM RAMADHAN" },
+        { id: "0109301030", nama: "LAZUARDI AZRA MARDIANA" },
+        { id: "0107857353", nama: "MIFZAL MUHAMMAD NIDAL" },
+        { id: "0117431097", nama: "MUHAMAD PAHRI ALGHIPARI" },
+        { id: "0119270443", nama: "MUHAMAD WAFI QINTHARA" },
+        { id: "0113717583", nama: "MUHAMMAD FABIAN YAKUB" },
+        { id: "0107331827", nama: "MUHAMMAD RAZKA IHSAN MAULUD" },
+        { id: "3104895436", nama: "MUHAMMAD RIZKI MUHARAM" },
+        { id: "0118235431", nama: "RIZKY AMAD MAULANA" },
+        { id: "0117523618", nama: "SHAKIEL ATHAYA JUANSYAH" },
+        { id: "0108458728", nama: "SIGIT SASIKIRANA" },
+        { id: "0106600474", nama: "SYUJA MUZZAKY AWALLUDIN HILMANSYAH" }
+    ],
+    "KELAS 10": [
+        { id: "3104010439", nama: "ADAM RAYYAN MAHENDRA" },
+        { id: "0104619088", nama: "DIMAS BAYU NUGRAHA" },
+        { id: "0097463663", nama: "FALIQ FAZA FAIZULLAH" },
+        { id: "0098193668", nama: "HAYCKAL ARYA BINTANG" },
+        { id: "0097101632", nama: "HILMAN NUL HAKIM" },
+        { id: "0097170769", nama: "MAULANA YUSUF" },
+        { id: "0101189109", nama: "MUHAMMAD RIJKI PATUROHMAN" },
+        { id: "0091254125", nama: "MUHAMMAD GILDAN RACHMAN GUNAWAN" },
+        { id: "0097070042", nama: "MUHAMMAD RASYAD GINANJAR" },
+        { id: "3094132037", nama: "MUHAMMAD SYAMIL RUMI HAKAMI" },
+        { id: "0107557184", nama: "ROFIQ MIFTAH RIZIQ" },
+        { id: "0105655561", nama: "SAMSUL ABDUL RAPI ANDALUSI" }
+    ],
+    "KELAS 11": [
+        { id: "0081841946", nama: "AHMAD NASHIRUDIN SALEH" },
+        { id: "0107853083", nama: "ALFAZ ARVA BAIHAQI" },
+        { id: "0093590072", nama: "AZHAR ABDUL HAKIM" },
+        { id: "93495951", nama: "DZAKWAN ABDUL HAKIM" },
+        { id: "0089984731", nama: "HADAD ANNAHDI" },
+        { id: "3096678012", nama: "M.FAWAZ FIRJATULLOH" },
+        { id: "92848772", nama: "MUHAMMAD AZKAA" },
+        { id: "0087539634", nama: "MUHAMMAD HILAL ARROFI" },
+        { id: "94772365", nama: "MUHAMMAD SALMAN ASHIDIQ" },
+        { id: "0083504436", nama: "NAUFAL SABIQ AMMARUDIN" },
+        { id: "0085856888", nama: "RADITYA TRI JAYADI" },
+        { id: "0086556301", nama: "REVA AHMAD KHAIRULLAH" },
+        { id: "0155880945", nama: "RIDHO MUHAMMAD SAID RAMADHAN" }
+    ]
+};
 
         let db, auth, scanner;
         let isProcessing = false;
@@ -237,52 +351,151 @@
         };
 
         window.startScanner = async () => {
-            const statusEl = document.getElementById('scan-status');
-            const actionOverlay = document.getElementById('action-overlay');
-            try {
-                if (scanner) await scanner.stop();
-                scanner = new Html5Qrcode("reader");
-                await scanner.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, onScanSuccess);
-                actionOverlay.classList.add('hidden');
-                statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
-            } catch (err) {
-                console.error(err);
-                document.getElementById('permission-text').innerHTML = "<span class='text-red-400'>Akses kamera gagal. Pastikan izin kamera aktif!</span>";
+    const statusEl = document.getElementById('scan-status');
+    const actionOverlay = document.getElementById('action-overlay');
+    const readerEl = document.getElementById('reader');
+
+    if (!readerEl) {
+        alert("Elemen 'reader' gak ketemu, Broo!");
+        return;
+    }
+
+    try {
+        statusEl.innerText = "MINTA IZIN KAMERA...";
+
+        // 1. Matikan scanner lama & BERSIHKAN elemen (PENTING!)
+        if (scanner) {
+            try { 
+                await scanner.stop(); 
+                scanner.clear(); // Hapus sisa UI scanner sebelumnya
+            } catch(e) {
+                console.log("Scanner emang belum jalan atau udah stop.");
             }
-        };
+        }
 
+        // 2. Inisialisasi ulang
+        scanner = new Html5Qrcode("reader");
+
+        // 3. Konfigurasi (Gue saranin qrbox jangan terlalu kaku)
+        const config = { 
+    fps: 15, // Jangan terlalu kenceng biar engine sempet "mikir"
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.0,
+    videoConstraints: {
+        focusMode: "continuous", // Paksa fokus terus
+        whiteBalanceMode: "continuous",
+        advanced: [{ zoom: 1.0 }] // Bisa lo naikin dikit kalau kartu kejauhan
+    }
+};
+
+await scanner.start(
+    { facingMode: "environment" }, 
+    config, 
+    onScanSuccess
+);
+
+        // 5. Update UI kalau sukses
+        actionOverlay.classList.add('hidden');
+        statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
+        console.log("Gaspol, Abu Kia! Scanner is Ready.");
+
+    } catch (err) {
+        console.error("Kamera Error:", err);
+        statusEl.innerText = "KAMERA GAGAL!";
+        
+        // Cek error spesifik (seringnya karena HTTPS atau Izin)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            alert("Scanner butuh HTTPS, Broo! Browser gak bakal kasih izin kamera di HTTP biasa.");
+        } else {
+            alert("Cek Izin Kamera: " + err);
+        }
+    }
+};
         window.exportToExcel = () => {
-            if (!absensiDataToday || absensiDataToday.length === 0) return;
-            const formatData = absensiDataToday.sort((a, b) => b.last_update - a.last_update).map((row, idx) => ({
-                "No": idx + 1, 
-                "Nama": row.nama || "-", 
-                "Kelas": row.kelas || "-", 
-                "Sesi": row.sesi || "-", 
-                "Status": row.last_status || "-", 
-                "Waktu Absen": new Date(row.last_update).toLocaleTimeString('id-ID')
-            }));
-            const ws = XLSX.utils.json_to_sheet(formatData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Absensi");
-            XLSX.writeFile(wb, `Absensi_${new Date().toISOString().split('T')[0]}.xlsx`);
-        };
+    // 1. Pastikan absensiDataToday diconvert ke Array dulu
+    const dataArray = Array.isArray(absensiDataToday) ? absensiDataToday : Object.values(absensiDataToday || {});
 
-        const init = async () => {
-            if (Object.keys(firebaseConfig).length === 0) return;
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+    if (dataArray.length === 0) {
+        alert("Belum ada data absensi untuk diekspor hari ini, Broo!");
+        return;
+    }
 
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
+    // 2. Formatting data (diurutkan dari yang terbaru)
+    const formatData = dataArray
+        .sort((a, b) => (b.last_update || 0) - (a.last_update || 0))
+        .map((row, idx) => ({
+            "No": idx + 1, 
+            "Nama": row.nama || "-", 
+            "Kelas": row.kelas || "-", 
+            "Sesi": row.sesi || "-", 
+            "Status": row.last_status || "-", 
+            "Waktu Absen": row.last_update ? new Date(row.last_update).toLocaleTimeString('id-ID') : "-"
+        }));
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    fetchJadwal();
-                    listenToAbsensi();
-                } else if (unsubAbsensi) unsubAbsensi();
-            });
+    // 3. Eksekusi Export
+    try {
+        const ws = XLSX.utils.json_to_sheet(formatData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Absensi");
+        
+        const fileName = `Absensi_Sholat_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    } catch (error) {
+        console.error("Gagal export Excel:", error);
+        alert("Library Excel (XLSX) belum terpasang atau ada error di script!");
+    }
+};
 
+function determineCurrentSesi(timings) {
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const parse = (t) => { 
+        if(!t) return 0;
+        const [h, m] = t.split(':').map(Number); 
+        return h * 60 + m; 
+    };
+
+    const sesiList = [
+        { id: 'fajr', start: timings.Fajr, end: "06:15", label: "Subuh" },
+        { id: 'dhuhr', start: timings.Dhuhr, end: "14:00", label: "Dzuhur" },
+        { id: 'asr', start: timings.Asr, end: "17:30", label: "Ashar" },
+        { id: 'maghrib', start: timings.Maghrib, end: "19:00", label: "Maghrib" },
+        { id: 'isha', start: timings.Isha, end: "21:00", label: "Isya" }
+    ];
+
+    currentSesi = sesiList.find(s => nowMins >= parse(s.start) && nowMins <= parse(s.end));
+    
+    sesiList.forEach(s => {
+        const el = document.getElementById(`sesi-${s.id}`);
+        if (el) {
+            if (currentSesi && s.id === currentSesi.id) {
+                el.classList.add('active-neon');
+                currentSesi.isLate = nowMins > (parse(s.start) + 15);
+            } else {
+                el.classList.remove('active-neon');
+            }
+        }
+    });
+}
+
+const init = async () => {
+    if (Object.keys(firebaseConfig).length === 0) return;
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // PANGGIL DI SINI BIAR PASTI JALAN PAS APP START
+    await fetchJadwal(); 
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // fetchJadwal(); // Ini bisa lo hapus biar gak manggil dua kali
+            listenToAbsensi();
+        } else if (unsubAbsensi) unsubAbsensi();
+    });
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -295,41 +508,43 @@
         };
 
         async function fetchJadwal() {
-            try {
-                const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=Garut&method=20`);
-                const json = await res.json();
-                const timings = json.data.timings;
-                const map = { Fajr: 'fajr', Dhuhr: 'dhuhr', Asr: 'asr', Maghrib: 'maghrib', Isha: 'isha' };
-                Object.keys(map).forEach(key => {
-                    const el = document.getElementById(`time-${map[key]}`);
-                    if(el) el.innerText = timings[key];
-                });
-                determineCurrentSesi(timings);
-            } catch (e) { console.error(e); }
-        }
+    try {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth() + 1;
+        const d = today.getDate();
 
-        function determineCurrentSesi(timings) {
-            const now = new Date();
-            const nowMins = now.getHours() * 60 + now.getMinutes();
-            const parse = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-            const sesiList = [
-                { id: 'fajr', start: timings.Fajr, end: "06:15", label: "Subuh" },
-                { id: 'dhuhr', start: timings.Dhuhr, end: "14:00", label: "Dzuhur" },
-                { id: 'asr', start: timings.Asr, end: "17:30", label: "Ashar" },
-                { id: 'maghrib', start: timings.Maghrib, end: "19:00", label: "Maghrib" },
-                { id: 'isha', start: timings.Isha, end: "21:00", label: "Isya" }
-            ];
-            currentSesi = sesiList.find(s => nowMins >= parse(s.start) && nowMins <= parse(s.end));
-            sesiList.forEach(s => {
-                const el = document.getElementById(`sesi-${s.id}`);
-                if (el) {
-                    if (currentSesi && s.id === currentSesi.id) {
-                        el.classList.add('active-neon');
-                        currentSesi.isLate = nowMins > (parse(s.start) + 15);
-                    } else el.classList.remove('active-neon');
-                }
-            });
-        }
+        // Pakai API myQuran (Data Kemenag RI untuk Garut ID: 1205)
+        const res = await fetch(`https://api.myquran.com/v2/sholat/jadwal/1205/${y}/${m}/${d}`);
+        const json = await res.json();
+        
+        if (!json.status) throw new Error("API Down, Broo!");
+
+        const jadwal = json.data.jadwal;
+        // Maping data API ke ID elemen di HTML lo
+        // Sesuaikan key (subuh, dzuhur, dll) dengan yang ada di UI
+        const map = { subuh: 'fajr', dzuhur: 'dhuhr', ashar: 'asr', maghrib: 'maghrib', isya: 'isha' };
+        
+        Object.keys(map).forEach(key => {
+            const el = document.getElementById(`time-${map[key]}`);
+            if(el) el.innerText = jadwal[key];
+        });
+
+        // Teruskan data ke logic sesi (Ubah format key biar cocok sama determineCurrentSesi)
+        const timingsForSesi = {
+            Fajr: jadwal.subuh,
+            Dhuhr: jadwal.dzuhur,
+            Asr: jadwal.ashar,
+            Maghrib: jadwal.maghrib,
+            Isha: jadwal.isya
+        };
+
+        determineCurrentSesi(timingsForSesi);
+        console.log("Jadwal Kemenag Terupdate: ", jadwal.tanggal);
+    } catch (e) { 
+        console.error("Gagal Fetch Jadwal:", e);
+    }
+}
 
         function listenToAbsensi() {
             if (!auth.currentUser) return;
@@ -342,35 +557,69 @@
             }, (err) => console.error(err));
         }
 
-        async function onScanSuccess(decodedText) {
-            if (isProcessing || !auth.currentUser) return;
-            const cleanedId = decodedText.trim();
-            const student = MASTER_SISWA.find(s => s.id === cleanedId);
-            
-            if (!student) {
-                const statusEl = document.getElementById('scan-status');
-                statusEl.innerText = "DATA TIDAK DIKENAL!";
-                statusEl.classList.add('text-red-500');
-                setTimeout(() => {
-                    statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
-                    statusEl.classList.remove('text-red-500');
-                }, 2000);
-                return;
-            }
+  async function onScanSuccess(decodedText) {
+    // 1. LOCK! Jangan kasih kendor
+    if (isProcessing || !auth?.currentUser) return;
+    isProcessing = true; 
 
-            const label = currentSesi ? currentSesi.label : "Luar Sesi";
-            const status = (currentSesi && currentSesi.isLate) ? "TERLAMBAT" : "HADIR";
-            isProcessing = true;
-            const today = new Date().toISOString().split('T')[0];
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat', `${today}_${student.id}`), {
-                    student_id: student.id, nama: student.nama, kelas: student.kelas,
-                    tanggal: today, sesi: label, last_status: status, last_update: Date.now()
-                }, { merge: true });
-                showFeedback(student.nama);
-            } catch (e) { console.error(e); }
-            setTimeout(() => isProcessing = false, 2500);
+    // 2. Bersihin data (Buang spasi & karakter aneh)
+    const cleanedId = String(decodedText).trim();
+    let student = null;
+    let studentKelas = "";
+
+    const statusEl = document.getElementById('scan-status');
+    if (statusEl) statusEl.innerText = "MENCARI DATA...";
+
+    // 3. Cari student (Pake String() biar pasti matching sama MASTER_SISWA)
+    for (const kelas in MASTER_SISWA) {
+        // Bandingkan String ke String biar gak meleset
+        const found = MASTER_SISWA[kelas].find(s => String(s.id).trim() === cleanedId);
+        if (found) {
+            student = found;
+            studentKelas = kelas;
+            break;
         }
+    }
+
+    // Jika ID Gak Ketemu
+    if (!student) {
+        console.warn("ID Tidak Terdaftar:", cleanedId);
+        if (statusEl) statusEl.innerText = `ID ${cleanedId} TIDAK DIKENAL!`;
+        setTimeout(() => { isProcessing = false; }, 2000);
+        return;
+    }
+
+    // 4. Sesi & Status
+    const label = (currentSesi) ? currentSesi.label : "Luar Sesi";
+    const status = (currentSesi?.isLate) ? "TERLAMBAT" : "HADIR";
+    const today = new Date().toISOString().split('T')[0];
+    
+    try {
+        // 5. Push ke Firebase
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat', `${today}_${student.id}`), {
+            student_id: student.id,
+            nama: student.nama,
+            kelas: studentKelas,
+            tanggal: today,
+            sesi: label,
+            last_status: status,
+            last_update: Date.now()
+        }, { merge: true });
+
+        if (statusEl) statusEl.innerText = `BERHASIL: ${student.nama}`;
+        showFeedback(student.nama);
+
+    } catch (e) { 
+        console.error("Firebase Error:", e);
+        if (statusEl) statusEl.innerText = "ERROR DATABASE!"; 
+    } finally {
+        // 6. Jeda 3 detik baru bisa scan lagi
+        setTimeout(() => { 
+            isProcessing = false; 
+            if (statusEl) statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
+        }, 3000);
+    }
+}
 
         function showFeedback(name) {
             const box = document.getElementById('info-box');
@@ -416,6 +665,7 @@
         }
 
         init();
+
     </script>
 </body>
 </html>
