@@ -126,38 +126,43 @@
         </div>
 
         <!-- PANEL KANAN (SCANNER) -->
-        <div class="w-1/2 relative bg-black flex items-center justify-center">
-            <div id="reader" class="absolute inset-0"></div>
-            
-            <div class="absolute inset-0 bg-black/40 pointer-events-none z-10 flex items-center justify-center">
-                <div class="w-[70%] h-[50%] border-2 border-teal-500/50 rounded-[2.5rem] relative overflow-hidden">
-                    <div class="scan-anim"></div>
-                    <div class="absolute -bottom-16 left-0 right-0 text-center">
-                        <p id="scan-status" class="text-[10px] text-white font-black uppercase tracking-[0.4em]">Siap Pindai QR</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="action-overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-500">
-                <div class="bg-teal-500/10 p-10 rounded-[3rem] border border-teal-500/30 text-center max-w-sm">
-                    <i data-lucide="camera" class="w-12 h-12 text-teal-400 mx-auto mb-4"></i>
-                    <h2 class="text-xl font-black text-white uppercase mb-2">Akses Kamera</h2>
-                    <p id="permission-text" class="text-xs text-slate-400 mb-8 leading-relaxed">Aktifkan kamera untuk mulai memproses absensi santri.</p>
-                    <button onclick="window.startScanner()" class="w-full py-4 bg-teal-500 hover:bg-teal-400 text-black font-black text-xs uppercase rounded-2xl transition-all shadow-lg shadow-teal-500/20">Aktifkan Kamera</button>
-                </div>
-            </div>
-            
-            <div id="info-box" class="absolute bottom-12 left-10 right-10 glass-card rounded-3xl p-6 hidden z-[60] border-teal-400 animate-bounce">
-                <div class="flex items-center gap-6">
-                    <div class="bg-teal-500 p-4 rounded-2xl text-black shadow-lg shadow-teal-500/30"><i data-lucide="user-check" class="w-8 h-8"></i></div>
-                    <div>
-                        <p class="text-[9px] font-bold text-teal-400 uppercase mb-1 tracking-widest">Absensi Berhasil</p>
-                        <h3 id="info-name" class="font-black text-2xl text-white uppercase tracking-tight">---</h3>
-                    </div>
-                </div>
+        <div class="w-1/2 relative bg-black flex items-center justify-center overflow-hidden">
+    
+    <!-- ELEMEN SCANNER (Gue bersihin biar gak tumpuk) -->
+    <div id="reader" class="w-full h-full object-cover"></div>
+    
+    <!-- OVERLAY ANIMASI (Z-Index 10 biar di atas kamera) -->
+    <div class="absolute inset-0 bg-black/20 pointer-events-none z-10 flex items-center justify-center">
+        <!-- Kotak Fokus (Ukuran disesuaikan biar pas sama QRbox kodingan) -->
+        <div class="w-[280px] h-[280px] border-2 border-teal-500/50 rounded-[2.5rem] relative overflow-hidden bg-transparent shadow-[0_0_0_999px_rgba(0,0,0,0.4)]">
+            <div class="scan-anim"></div>
+            <div class="absolute bottom-6 left-0 right-0 text-center">
+                <p id="scan-status" class="text-[10px] text-white font-black uppercase tracking-[0.4em] drop-shadow-lg">Siap Pindai QR</p>
             </div>
         </div>
     </div>
+
+    <!-- OVERLAY IZIN KAMERA (Z-Index 50) -->
+    <div id="action-overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-500">
+        <div class="bg-teal-500/10 p-10 rounded-[3rem] border border-teal-500/30 text-center max-w-sm">
+            <i data-lucide="camera" class="w-12 h-12 text-teal-400 mx-auto mb-4"></i>
+            <h2 class="text-xl font-black text-white uppercase mb-2">Akses Kamera</h2>
+            <p id="permission-text" class="text-xs text-slate-400 mb-8 leading-relaxed">Aktifkan kamera untuk mulai memproses absensi santri.</p>
+            <button onclick="window.startScanner()" class="w-full py-4 bg-teal-500 hover:bg-teal-400 text-black font-black text-xs uppercase rounded-2xl transition-all shadow-lg shadow-teal-500/20 active:scale-95">Aktifkan Kamera</button>
+        </div>
+    </div>
+    
+    <!-- INFO BERHASIL (Z-Index 60) -->
+    <div id="info-box" class="absolute bottom-12 left-10 right-10 glass-card rounded-3xl p-6 hidden z-[60] border-2 border-teal-400 animate-bounce">
+        <div class="flex items-center gap-6">
+            <div class="bg-teal-500 p-4 rounded-2xl text-black shadow-lg shadow-teal-500/30"><i data-lucide="user-check" class="w-8 h-8"></i></div>
+            <div>
+                <p class="text-[9px] font-bold text-teal-400 uppercase mb-1 tracking-widest">Absensi Berhasil</p>
+                <h3 id="info-name" class="font-black text-2xl text-white uppercase tracking-tight">---</h3>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -377,15 +382,11 @@
         scanner = new Html5Qrcode("reader");
 
         // 3. Konfigurasi (Gue saranin qrbox jangan terlalu kaku)
-        const config = { 
-    fps: 15, // Jangan terlalu kenceng biar engine sempet "mikir"
-    qrbox: { width: 250, height: 250 },
+       const config = { 
+    fps: 15, 
+    qrbox: { width: 280, height: 280 }, // Sesuaikan sama ukuran div di atas
     aspectRatio: 1.0,
-    videoConstraints: {
-        focusMode: "continuous", // Paksa fokus terus
-        whiteBalanceMode: "continuous",
-        advanced: [{ zoom: 1.0 }] // Bisa lo naikin dikit kalau kartu kejauhan
-    }
+    disableFlip: false 
 };
 
 await scanner.start(
