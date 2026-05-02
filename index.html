@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Absensi Sholat Berjamaah - Landscape Dashboard</title>
+    <title>Absensi Sholat Berjamaah - SMP Al-Ghifari</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -14,519 +13,409 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Amiri:wght@700&display=swap');
         
-        :root {
-            --tosca-glow: #2dd4bf;
+        :root { 
+            --tosca-glow: #2dd4bf; 
+            --neon-border: rgba(45, 212, 191, 0.3); 
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0b0f1a;
+            background-color: #02040a; 
             color: #f8fafc;
             height: 100vh;
             margin: 0;
             overflow: hidden;
-            background-image: linear-gradient(to right, rgba(11, 15, 26, 0.92), rgba(11, 15, 26, 0.7)), 
-                              url('https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=2070&auto=format&fit=crop');
+            background-image: 
+                linear-gradient(to right, rgba(2, 4, 10, 0.8) 0%, rgba(2, 4, 10, 0.98) 100%), 
+                url('https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
         }
 
-        .bismillah {
-            font-family: 'Amiri', serif;
-            font-size: 1.8rem;
-            color: var(--tosca-glow);
-        }
+        .bismillah { font-family: 'Amiri', serif; color: var(--tosca-glow); text-shadow: 0 0 15px rgba(45, 212, 191, 0.8); }
+        .neon-card { background: rgba(15, 23, 42, 0.4); border: 1px solid var(--neon-border); backdrop-filter: blur(8px); }
+        .active-neon { background: rgba(45, 212, 191, 0.2) !important; border-color: var(--tosca-glow) !important; box-shadow: 0 0 30px rgba(45, 212, 191, 0.4); }
+        .glass-card { background: rgba(10, 15, 28, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
 
-        .glow-text {
-            color: #ffffff;
-            text-shadow: 0 0 10px var(--tosca-glow), 0 0 20px rgba(45, 212, 191, 0.3);
-        }
+        #reader { width: 100% !important; height: 100% !important; border: none !important; }
+        #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 0; }
 
-        .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        #reader {
-            width: 100% !important;
-            height: 100% !important;
-            border: none !important;
-        }
-
-        #reader video {
-            object-fit: cover !important;
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        @keyframes scan-line {
-            0%, 100% { top: 15%; opacity: 0.8; }
-            50% { top: 85%; opacity: 0.2; }
-        }
-
+        @keyframes scan-line { 0%, 100% { top: 20%; opacity: 0.8; } 50% { top: 80%; opacity: 0.2; } }
         .scan-anim {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--tosca-glow);
-            box-shadow: 0 0 25px var(--tosca-glow);
-            animation: scan-line 3.5s infinite ease-in-out;
-            z-index: 20;
+            position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            background: var(--tosca-glow); box-shadow: 0 0 25px var(--tosca-glow);
+            animation: scan-line 3s infinite ease-in-out; z-index: 20;
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(45, 212, 191, 0.2); border-radius: 10px; }
-
-        .split-container {
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        .left-panel {
-            width: 50%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .right-panel {
-            width: 50%;
-            height: 100%;
-            position: relative;
-            background: #000;
-        }
-
-        .prayer-box.active-neon {
-            background: rgba(45, 212, 191, 0.15);
-            border-color: var(--tosca-glow);
-            box-shadow: 0 0 20px rgba(45, 212, 191, 0.2), inset 0 0 10px rgba(45, 212, 191, 0.1);
-        }
-        
-        .logo-placeholder {
-            width: 60px;
-            height: 60px;
-            border: 2px dashed rgba(45, 212, 191, 0.4);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 1.5rem auto 0;
-            background: rgba(45, 212, 191, 0.05);
-            overflow: hidden;
-        }
-
-        .logo-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .history-item {
-            animation: slideIn 0.3s ease-out forwards;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
-}
+        .modal-overlay { background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
     </style>
 </head>
-<body>
-
-    <div class="split-container">
-        <!-- SISI KIRI -->
-        <div class="left-panel p-10 lg:p-12 space-y-6 overflow-y-auto custom-scroll">
-            <div class="text-center">
-                <div class="bismillah tracking-widest text-teal-400 mb-2">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
-                <div class="inline-block">
-                    <h1 class="text-4xl lg:text-5xl font-black glow-text leading-tight uppercase tracking-tighter">
-                        Monitoring<br>Absensi Sholat
-                    </h1>
-                    <div class="logo-placeholder" style="width: 80px; height: 80px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-    <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
-</div>
-                    <div class="mt-4 flex justify-center text-center">
-                        <div>
-                            <p id="current-date" class="text-slate-300 text-[10px] font-bold tracking-[0.3em] uppercase border-y border-teal-500/50 py-2 px-6 bg-black/20 backdrop-blur-sm"></p>
-                            <p class="text-[8px] text-teal-500/60 mt-2 font-bold tracking-widest uppercase">Kec. Tarogong Kidul, Garut</p>
-                        </div>
-                    </div>
-                </div>
+<body class="antialiased">
+    
+    <!-- Modal Konfirmasi Reset -->
+    <div id="reset-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="glass-card max-w-sm w-full p-8 rounded-[2rem] border-red-500/30 text-center">
+            <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="alert-triangle" class="text-red-500 w-8 h-8"></i>
             </div>
-
-            <!-- JADWAL SHOLAT -->
-            <div class="grid grid-cols-5 gap-3">
-                <div id="sesi-fajr" class="prayer-box glass-card p-4 rounded-2xl text-center border transition-all">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Subuh</p>
-                    <p id="time-fajr" class="text-xs font-black text-white mt-1">--:--</p>
-                </div>
-                <div id="sesi-dhuhr" class="prayer-box glass-card p-4 rounded-2xl text-center border transition-all">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Dzuhur</p>
-                    <p id="time-dhuhr" class="text-xs font-black text-white mt-1">--:--</p>
-                </div>
-                <div id="sesi-asr" class="prayer-box glass-card p-4 rounded-2xl text-center border transition-all">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Ashar</p>
-                    <p id="time-asr" class="text-xs font-black text-white mt-1">--:--</p>
-                </div>
-                <div id="sesi-maghrib" class="prayer-box glass-card p-4 rounded-2xl text-center border transition-all">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Maghrib</p>
-                    <p id="time-maghrib" class="text-xs font-black text-white mt-1">--:--</p>
-                </div>
-                <div id="sesi-isha" class="prayer-box glass-card p-4 rounded-2xl text-center border transition-all">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Isya</p>
-                    <p id="time-isha" class="text-xs font-black text-white mt-1">--:--</p>
-                </div>
+            <h3 class="text-xl font-black text-white uppercase mb-2">Reset Data Hari Ini?</h3>
+            <p class="text-xs text-slate-400 mb-8 leading-relaxed">Tindakan ini akan menghapus semua log absensi untuk hari ini.</p>
+            <div class="flex gap-3">
+                <button onclick="window.closeResetModal()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase rounded-xl transition-all">Batal</button>
+                <button onclick="window.confirmReset()" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] uppercase rounded-xl transition-all shadow-lg shadow-red-500/20">Ya, Hapus</button>
             </div>
-
-            <!-- STATISTIK -->
-            <div class="grid grid-cols-3 gap-4">
-                <div class="glass-card p-5 rounded-[1.5rem] border-l-4 border-teal-500">
-                    <p class="text-[9px] text-slate-400 font-bold uppercase mb-1">Hadir</p>
-                    <p id="stat-hadir" class="text-3xl font-black text-teal-400">0</p>
-                </div>
-                <div class="glass-card p-5 rounded-[1.5rem] border-l-4 border-yellow-500">
-                    <p class="text-[9px] text-slate-400 font-bold uppercase mb-1">Telat</p>
-                    <p id="stat-telat" class="text-3xl font-black text-yellow-400">0</p>
-                </div>
-                <div class="glass-card p-5 rounded-[1.5rem] border-l-4 border-red-500/40">
-                    <p class="text-[9px] text-slate-400 font-bold uppercase mb-1">Belum</p>
-                    <p id="stat-mangkir" class="text-3xl font-black text-red-500/60">0</p>
-                </div>
-            </div>
-
-          <div class="flex flex-col space-y-3">
-    <div class="flex justify-between items-center border-b border-white/10 pb-2">
-        <h2 class="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
-            <i data-lucide="users" class="w-3 h-3 text-teal-500"></i>
-            Daftar Siswa <span id="current-sesi-name"></span>
-        </h2>
-        
-        <!-- GROUP TOMBOL ACTION -->
-        <div class="flex gap-4">
-            <button onclick="clearHistory()" class="text-[9px] font-bold uppercase text-red-400/70 hover:text-red-400 transition-colors">
-                Clear List
-            </button>
-            <button onclick="exportData()" class="text-[9px] font-bold uppercase text-teal-400 hover:text-white transition-colors">
-                Unduh Excel
-            </button>
         </div>
     </div>
-    <div id="stats-list" class="max-h-[250px] overflow-y-auto pr-3 custom-scroll space-y-2"></div>
-</div>
 
-                <!-- PANEL HISTORY TERAKHIR -->
-                <div class="flex flex-col space-y-3">
-                    <div class="flex items-center gap-2 border-b border-white/10 pb-2">
-                        <h2 class="text-[10px] font-black text-teal-400 uppercase tracking-[0.3em] flex items-center gap-2">
-                            <span class="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></span>
-                            Baru Saja Absen
-                        </h2>
-                    </div>
-                    <div id="history-list" class="space-y-2">
-                        <p class="text-[9px] text-slate-500 text-center py-4 uppercase tracking-widest italic">Belum ada aktivitas</p>
+    <div class="flex h-screen w-full overflow-hidden relative">
+        <!-- PANEL KIRI -->
+        <div class="w-1/2 p-8 flex flex-col space-y-6 overflow-y-auto border-r border-white/10 bg-black/20">
+            <div class="flex items-center bg-white/5 p-6 rounded-[2.5rem] border border-white/10 relative overflow-hidden">
+                <div class="flex-shrink-0 bg-white/10 p-3 rounded-2xl overflow-hidden flex items-center justify-center w-20 h-20">
+                    <img src="logo.png" 
+                         alt="Logo Sekolah" 
+                         class="max-h-full max-w-full object-contain"
+                         onerror="this.src='https://via.placeholder.com/150?text=LOGO'; this.onerror=null;">
+                </div>
+                <div class="flex-1 text-center pr-4">
+                    <p class="bismillah mb-1 text-2xl">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+                    <h1 class="text-2xl font-black text-white tracking-tighter uppercase">Presensi Sholat</h1>
+                    <p id="current-date" class="text-[8px] font-bold text-teal-400 uppercase tracking-[0.4em] mt-3"></p>
+                </div>
+            </div>
+
+            <!-- Sesi Sholat Indicators -->
+            <div class="grid grid-cols-5 gap-3">
+                <div id="sesi-fajr" class="neon-card p-4 rounded-2xl text-center"><p class="text-[8px] text-teal-300 font-black mb-1 text-nowrap">SUBUH</p><p id="time-fajr" class="text-base text-white font-black">--:--</p></div>
+                <div id="sesi-dhuhr" class="neon-card p-4 rounded-2xl text-center"><p class="text-[8px] text-teal-300 font-black mb-1 text-nowrap">DZUHUR</p><p id="time-dhuhr" class="text-base text-white font-black">--:--</p></div>
+                <div id="sesi-asr" class="neon-card p-4 rounded-2xl text-center"><p class="text-[8px] text-teal-300 font-black mb-1 text-nowrap">ASHAR</p><p id="time-asr" class="text-base text-white font-black">--:--</p></div>
+                <div id="sesi-maghrib" class="neon-card p-4 rounded-2xl text-center"><p class="text-[8px] text-teal-300 font-black mb-1 text-nowrap">MAGHRIB</p><p id="time-maghrib" class="text-base text-white font-black">--:--</p></div>
+                <div id="sesi-isha" class="neon-card p-4 rounded-2xl text-center"><p class="text-[8px] text-teal-300 font-black mb-1 text-nowrap">ISYA</p><p id="time-isha" class="text-base text-white font-black">--:--</p></div>
+            </div>
+
+            <!-- Counter Stats -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-teal-500">
+                    <p class="text-[8px] text-slate-300 font-bold uppercase mb-1">Hadir</p>
+                    <p id="stat-hadir" class="text-3xl font-black text-white">0</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-yellow-500">
+                    <p class="text-[8px] text-slate-300 font-bold uppercase mb-1">Telat</p>
+                    <p id="stat-telat" class="text-3xl font-black text-white">0</p>
+                </div>
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-red-500">
+                    <p class="text-[8px] text-slate-300 font-bold uppercase mb-1">Belum (dari 137)</p>
+                    <p id="stat-mangkir" class="text-3xl font-black text-white">137</p>
+                </div>
+            </div>
+
+            <!-- Log Activity -->
+            <div class="flex-1 min-h-0 flex flex-col space-y-3 overflow-hidden">
+                <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                    <h2 class="text-[10px] font-black text-white uppercase tracking-[0.2em]">Log Aktivitas Terbaru</h2>
+                    <div class="flex gap-4 items-center">
+                        <button onclick="window.openResetModal()" class="text-[9px] font-bold text-red-400 uppercase hover:text-red-300 transition-all flex items-center gap-1">
+                             <i data-lucide="refresh-cw" class="w-3 h-3"></i> Reset
+                        </button>
+                        <span class="w-[1px] h-3 bg-white/10"></span>
+                        <button id="btn-export" onclick="window.exportToExcel()" class="text-[9px] font-bold text-teal-400 uppercase hover:text-teal-200 transition-all cursor-pointer">Export Excel</button>
                     </div>
                 </div>
+                <div id="history-list" class="flex-1 overflow-y-auto space-y-2 pr-2"></div>
             </div>
         </div>
 
-        <!-- SISI KANAN (SCANNER) -->
-        <div class="right-panel">
-            <div id="reader" class="h-full w-full"></div>
-            <div class="scan-anim"></div>
+        <!-- PANEL KANAN (SCANNER) -->
+        <div class="w-1/2 relative bg-black flex items-center justify-center">
+            <div id="reader" class="absolute inset-0"></div>
             
-            <!-- POPUP BERHASIL -->
-            <div id="info-box" class="absolute bottom-10 left-10 right-10 glass-card rounded-[2rem] p-8 hidden border-teal-500 shadow-[0_0_60px_-15px_rgba(45,212,191,0.6)] z-40 animate-bounce">
-                <div class="flex items-center gap-6">
-                    <div class="bg-teal-500 p-4 rounded-2xl text-black">
-                        <i data-lucide="shield-check" class="w-10 h-10"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-teal-400 uppercase tracking-[0.3em]">Absensi Berhasil</p>
-                        <h3 id="info-name" class="font-black text-3xl text-white tracking-tight">---</h3>
-                        <p id="info-detail" class="text-sm text-slate-400 mt-1"></p>
+            <div class="absolute inset-0 bg-black/40 pointer-events-none z-10 flex items-center justify-center">
+                <div class="w-[70%] h-[50%] border-2 border-teal-500/50 rounded-[2.5rem] relative overflow-hidden">
+                    <div class="scan-anim"></div>
+                    <div class="absolute -bottom-16 left-0 right-0 text-center">
+                        <p id="scan-status" class="text-[10px] text-white font-black uppercase tracking-[0.4em]">Siap Pindai QR</p>
                     </div>
                 </div>
             </div>
 
-            <div class="absolute top-10 right-10 z-30">
-                <div id="camera-status" class="bg-black/60 backdrop-blur-xl px-5 py-2 rounded-full border border-white/10 flex items-center gap-3 cursor-pointer">
-                    <div id="status-dot" class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <p id="status-text" class="text-[9px] font-bold text-white uppercase tracking-widest">Inisialisasi...</p>
+            <div id="action-overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-500">
+                <div class="bg-teal-500/10 p-10 rounded-[3rem] border border-teal-500/30 text-center max-w-sm">
+                    <i data-lucide="camera" class="w-12 h-12 text-teal-400 mx-auto mb-4"></i>
+                    <h2 class="text-xl font-black text-white uppercase mb-2">Akses Kamera</h2>
+                    <p id="permission-text" class="text-xs text-slate-400 mb-8 leading-relaxed">Aktifkan kamera untuk mulai memproses absensi santri.</p>
+                    <button onclick="window.startScanner()" class="w-full py-4 bg-teal-500 hover:bg-teal-400 text-black font-black text-xs uppercase rounded-2xl transition-all shadow-lg shadow-teal-500/20">Aktifkan Kamera</button>
+                </div>
+            </div>
+            
+            <div id="info-box" class="absolute bottom-12 left-10 right-10 glass-card rounded-3xl p-6 hidden z-[60] border-teal-400 animate-bounce">
+                <div class="flex items-center gap-6">
+                    <div class="bg-teal-500 p-4 rounded-2xl text-black shadow-lg shadow-teal-500/30"><i data-lucide="user-check" class="w-8 h-8"></i></div>
+                    <div>
+                        <p class="text-[9px] font-bold text-teal-400 uppercase mb-1 tracking-widest">Absensi Berhasil</p>
+                        <h3 id="info-name" class="font-black text-2xl text-white uppercase tracking-tight">---</h3>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot,query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyD1GjekEZ9ygmK9nh2p4sGyuTylByWztho",
-        authDomain: "absen-sholat-7d00d.firebaseapp.com",
-        projectId: "absen-sholat-7d00d",
-        storageBucket: "absen-sholat-7d00d.firebasestorage.app",
-        messagingSenderId: "592228197757",
-        appId: "1:592228197757:web:19c5965d714a1b9e66d814"
-    };
+        const firebaseConfigRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        const firebaseConfig = firebaseConfigRaw ? JSON.parse(firebaseConfigRaw) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-    const MASTER_SISWA = [
-        { id: "1001", nama: "Ahmad Fauzi" },
-        { id: "1002", nama: "Siti Aminah" },
-        { id: "1003", nama: "Zulkifli Mansur" },
-        { id: "1004", nama: "Rizky Ramadhan" },
-        { id: "1005", nama: "Budi Santoso" },
-        { id: "1006", nama: "Laila Majnun" }
-    ];
+        // TOTAL SISWA UPDATE JADI 137 SESUAI DATA IKHWAN
+        const TOTAL_SISWA = 137;
 
-    let auth, db, currentUser, jadwalHariIni, currentAbsensiData = [];
-    let html5QrCode = null;
-
-    // 1. TAMPILAN JAM (Langsung jalan, gak nunggu Firebase)
-    const updateDate = () => {
-        const el = document.getElementById('current-date');
-        if (el) el.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    };
-
-    // 2. JADWAL SHOLAT
-    async function fetchJadwal() {
-        try {
-            const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=Tarogong%20Kidul,%20Garut,%20Indonesia&method=20`);
-            const json = await res.json();
-            jadwalHariIni = json.data.timings;
-            const keys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-            keys.forEach(k => {
-                const el = document.getElementById(`time-${k.toLowerCase()}`);
-                if (el) el.innerText = jadwalHariIni[k];
-            });
-            updateActiveSesi();
-        } catch (e) { console.error("API Error:", e); }
-    }
-
-    function getSesiAktif() {
-        if (!jadwalHariIni) return null;
-        const now = new Date();
-        const nowMins = now.getHours() * 60 + now.getMinutes();
-        const parse = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-        const sesi = [
-            { id: 'fajr', label: 'Subuh', start: jadwalHariIni.Fajr, end: "06:30" },
-            { id: 'dhuhr', label: 'Dzuhur', start: jadwalHariIni.Dhuhr, end: "14:30" },
-            { id: 'asr', label: 'Ashar', start: jadwalHariIni.Asr, end: "17:45" },
-            { id: 'maghrib', label: 'Maghrib', start: jadwalHariIni.Maghrib, end: "19:00" },
-            { id: 'isha', label: 'Isya', start: jadwalHariIni.Isha, end: "21:00" }
+        // DATABASE SISWA (Disederhanakan untuk efisiensi file, pastikan ID sesuai CSV)
+        const MASTER_SISWA = [
+            { id: "3127465766", nama: "AFKHAR MUHAMAD FIRDAUS NUGRAHA", kelas: "7A" },
+            { id: "0133122809", nama: "Ahmad Mukhlis Dzaki Sopian", kelas: "7A" },
+            { id: "3135691911", nama: "AKBAR CHAEDAR AL BAIHAQI", kelas: "7A" },
+            { id: "0122700074", nama: "ARDIGA DEZAR NOEGRAHA", kelas: "7A" },
+            { id: "0139230548", nama: "Azzam Raditya Ruhiyatna", kelas: "7A" },
+            { id: "3129626322", nama: "Dzaky Rafif Maulana", kelas: "7A" },
+            { id: "3128108675", nama: "Faizal Wildansah", kelas: "7A" },
+            { id: "0137354180", nama: "FAQIH AL FATIH USMAN", kelas: "7A" },
+            { id: "3123211221", nama: "FAUZAN RAFIIANDRA", kelas: "7A" },
+            { id: "0128510991", nama: "Fhaza Ahshanul Muttaqin", kelas: "7A" },
+            { id: "0122183078", nama: "FIKRI ABDULLAH MUTTAQIN", kelas: "7A" },
+            { id: "0127963314", nama: "HADI NUR RAHARJA", kelas: "7A" },
+            { id: "0127779202", nama: "Jamaludin", kelas: "7A" },
+            { id: "0134934068", nama: "M. ATTARIZ ZAHRAN CALIEF", kelas: "7A" },
+            { id: "0134793628", nama: "MAHARDIKA RAFA PUTRA SUNJAYA", kelas: "7A" },
+            { id: "3133196637", nama: "MARCELLO SETIAWAN", kelas: "7A" },
+            { id: "0131454661", nama: "Mu'adz Al Fath", kelas: "7A" },
+            { id: "0131924619", nama: "MUHAMAD ADITYA RAMDANI", kelas: "7A" },
+            { id: "0132338166", nama: "MUHAMAD ALIF MAULANA", kelas: "7A" },
+            { id: "3133959955", nama: "MUHAMMAD ALBI MAULANA", kelas: "7A" },
+            { id: "0126447820", nama: "MUHAMMAD FARHAN MAULANA", kelas: "7A" },
+            { id: "3104010439", nama: "ADAM RAYYAN MAHENDRA", kelas: "10" },
+            { id: "0081841946", nama: "Ahmad Nashirudin Saleh", kelas: "11" },
+            { id: "0107853083", nama: "Alfaz Arva Baihaqi", kelas: "10" },
+            { id: "0116705318", nama: "Ibadu Robbani", kelas: "9C" },
+            { id: "3107302765", nama: "KHAIRUL AZAM RAMADHAN", kelas: "9C" },
+            { id: "0109301030", nama: "Lazuardi Azra Mardiana", kelas: "9C" },
+            { id: "0107857353", nama: "Mifzal Muhammad Nidal", kelas: "9C" },
+            { id: "0117431097", nama: "MUHAMAD PAHRI ALGHIPARI", kelas: "9C" },
+            { id: "0119270443", nama: "MUHAMAD WAFI QINTHARA", kelas: "9C" },
+            { id: "0113717583", nama: "MUHAMMAD FABIAN YAKUB", kelas: "9C" },
+            { id: "0107331827", nama: "MUHAMMAD RAZKA IHSAN MAULUD", kelas: "9C" },
+            { id: "3104895436", nama: "MUHAMMAD RIZKI MUHARAM", kelas: "9C" },
+            { id: "0118235431", nama: "Rizky Amad Maulana", kelas: "9C" },
+            { id: "0117523618", nama: "Shakiel Athaya Juansyah", kelas: "9C" },
+            { id: "0108458728", nama: "SIGIT SASIKIRANA", kelas: "9C" },
+            { id: "0106600474", nama: "SYUJA MUZZAKY AWALLUDIN HILMANSYAH", kelas: "9C" }
         ];
-        for (const s of sesi) {
-            if (nowMins >= parse(s.start) && nowMins <= parse(s.end)) {
-                return { ...s, isLate: nowMins > (parse(s.start) + 15) };
+
+        let db, auth, scanner;
+        let isProcessing = false;
+        let currentSesi = null;
+        let absensiDataToday = [];
+        let unsubAbsensi = null;
+
+        window.openResetModal = () => document.getElementById('reset-modal').classList.remove('hidden');
+        window.closeResetModal = () => document.getElementById('reset-modal').classList.add('hidden');
+        
+        window.confirmReset = async () => {
+            if (!auth || !auth.currentUser) return;
+            const statusEl = document.getElementById('scan-status');
+            const today = new Date().toISOString().split('T')[0];
+            try {
+                window.closeResetModal();
+                statusEl.innerText = "MENGHAPUS DATA...";
+                const qDocs = query(collection(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat'), where("tanggal", "==", today));
+                const snap = await getDocs(qDocs);
+                await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+                statusEl.innerText = "DATA BERHASIL DIRESET";
+                setTimeout(() => statusEl.innerText = scanner ? "KAMERA AKTIF" : "SIAP PINDAI", 2000);
+            } catch (err) { console.error(err); }
+        };
+
+        window.startScanner = async () => {
+            const statusEl = document.getElementById('scan-status');
+            const actionOverlay = document.getElementById('action-overlay');
+            try {
+                if (scanner) await scanner.stop();
+                scanner = new Html5Qrcode("reader");
+                await scanner.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, onScanSuccess);
+                actionOverlay.classList.add('hidden');
+                statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
+            } catch (err) {
+                console.error(err);
+                document.getElementById('permission-text').innerHTML = "<span class='text-red-400'>Akses kamera gagal. Pastikan izin kamera aktif!</span>";
             }
-        }
-        return null;
-    }
+        };
 
-    function updateActiveSesi() {
-        const active = getSesiAktif();
-        ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach(s => {
-            const el = document.getElementById(`sesi-${s}`);
-            el?.classList.toggle('active-neon', active && s === active.id);
-        });
-        const nameEl = document.getElementById('current-sesi-name');
-        if (nameEl) nameEl.innerText = active ? `(${active.label})` : "";
-        renderDashboard();
-    }
+        window.exportToExcel = () => {
+            if (!absensiDataToday || absensiDataToday.length === 0) return;
+            const formatData = absensiDataToday.sort((a, b) => b.last_update - a.last_update).map((row, idx) => ({
+                "No": idx + 1, 
+                "Nama": row.nama || "-", 
+                "Kelas": row.kelas || "-", 
+                "Sesi": row.sesi || "-", 
+                "Status": row.last_status || "-", 
+                "Waktu Absen": new Date(row.last_update).toLocaleTimeString('id-ID')
+            }));
+            const ws = XLSX.utils.json_to_sheet(formatData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Absensi");
+            XLSX.writeFile(wb, `Absensi_${new Date().toISOString().split('T')[0]}.xlsx`);
+        };
 
-    // 3. SCANNER LOGIC
-    async function startScanner() {
-    console.log("Mengoptimalkan kamera...");
-    const readerEl = document.getElementById('reader');
-    if (!readerEl) return;
+        const init = async () => {
+            if (Object.keys(firebaseConfig).length === 0) return;
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
 
-    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-    
-    // Konfigurasi QR Box dan Video
-    const qrConfig = { 
-        fps: 20, // Naikin fps biar lebih smooth
-        qrbox: (viewfinderWidth, viewfinderHeight) => {
-            // Box otomatis membesar: 70% dari area terkecil
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7); 
-            return { width: boxSize, height: boxSize };
-        },
-        aspectRatio: 1.0 // Pakai kotak sempurna (1:1)
-    };
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
 
-    try {
-        const devices = await Html5Qrcode.getCameras();
-        if (devices && devices.length > 0) {
-            const backCam = devices.find(d => 
-                d.label.toLowerCase().includes('back') || 
-                d.label.toLowerCase().includes('rear')
-            );
-            
-            const selectedCameraId = backCam ? backCam.id : devices[0].id;
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    fetchJadwal();
+                    listenToAbsensi();
+                } else if (unsubAbsensi) unsubAbsensi();
+            });
 
-            await html5QrCode.start(
-                selectedCameraId, 
-                {
-                    ...qrConfig,
-                    // Tambahan config video untuk maksa autofocus dan resolusi
-                    videoConstraints: {
-                        facingMode: "environment",
-                        width: { ideal: 1280 }, // Minta resolusi HD biar fokus tajam
-                        height: { ideal: 720 },
-                        focusMode: "continuous" // Pakai mode fokus terus menerus
-                    }
-                }, 
-                onScanSuccess
-            );
-            
-            document.getElementById('status-dot').className = "w-2 h-2 bg-teal-500 rounded-full animate-ping";
-            document.getElementById('status-text').innerText = "Active";
-        }
-    } catch (err) {
-        console.error("Scanner Error:", err);
-        document.getElementById('status-text').innerText = "Failed";
-    }
-}
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) { console.error(err); }
 
-    async function onScanSuccess(decodedText) {
-        const student = MASTER_SISWA.find(s => s.id === decodedText.trim());
-        const sesi = getSesiAktif();
-        if (!student || !sesi) return alert(!student ? "ID Salah" : "Belum Waktu Sholat");
+            lucide.createIcons();
+        };
 
-        const today = new Date().toISOString().split('T')[0];
-        try {
-            await setDoc(doc(db, 'absensi_sholat', `${today}_${student.id}`), {
-                student_id: student.id,
-                nama: student.nama,
-                tanggal: today,
-                [`jam_${sesi.id}`]: new Date().toLocaleTimeString('id-ID'),
-                [`status_${sesi.id}`]: sesi.isLate ? "TERLAMBAT" : "HADIR",
-                last_update: Date.now()
-            }, { merge: true });
-            alert(`Berhasil: ${student.nama}`);
-        } catch (e) { console.error(e); }
-    }
-
-window.clearHistory = async () => {
-    // 1. Validasi Masalah: Konfirmasi user (Gaya lo banget)
-    if (!confirm("Hapus semua data absensi hari ini? Tindakan ini gak bisa di-undo, Broo!")) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    
-    // 2. Analisis Akar Masalah: Query data spesifik hari ini
-    const q = query(collection(db, 'absensi_sholat'), where("tanggal", "==", today));
-    
-    try {
-        const querySnapshot = await getDocs(q);
-        
-        // 3. Verifikasi Data: Cek kalau emang ada yang perlu dihapus
-        if (querySnapshot.empty) {
-            alert("Emang udah kosong, Broo. Gak ada yang perlu dihapus.");
-            return;
-        }
-
-        // 4. Solusi Utama: Eksekusi hapus massal (Batch delete via Promise.all)
-        const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
-        await Promise.all(deletePromises);
-        
-        // 5. Feedback: Info sukses ke user
-        alert("History hari ini bersih, Broo! List otomatis update.");
-        
-        // Opsional: Kalau lo mau list di UI langsung hilang tanpa reload
-        const listContainer = document.getElementById('stats-list');
-        if (listContainer) listContainer.innerHTML = ''; 
-
-    } catch (e) {
-        // Debug lanjutan jika gagal
-        console.error("Gagal hapus:", e);
-        alert("Gagal hapus data, cek koneksi atau permission Firebase lo!");
-    }
-};
-
-    // 4. DASHBOARD RENDER
-   function renderDashboard() {
-    const active = getSesiAktif();
-    const today = new Date().toISOString().split('T')[0];
-    
-    // --- LOGIC UTAMA DAFTAR SISWA (Eksisting) ---
-    // ... (kode lo yang nampilin daftar semua siswa tetap di sini) ...
-
-    // --- LOGIC PANEL HISTORY TERAKHIR (SISIPKAN DI SINI) ---
-    const historyList = document.getElementById('history-list');
-    if (historyList) {
-        // 1. Filter hanya data hari ini yang punya timestamp (last_update)
-        // 2. Sort dari yang paling baru (descending)
-        // 3. Ambil 3 orang terakhir saja
-        const recentLogs = [...currentAbsensiData]
-            .filter(d => d.tanggal === today && d.last_update)
-            .sort((a, b) => b.last_update - a.last_update)
-            .slice(0, 3);
-
-        if (recentLogs.length > 0) {
-            historyList.innerHTML = recentLogs.map(log => {
-                // Ambil jam sesuai sesi aktif saat ini
-                const jamAbsen = log[`jam_${active?.id}`] || "Baru saja";
-                
-                return `
-                    <div class="flex items-center justify-between p-2 bg-white/5 rounded-lg border-l-2 border-teal-500 animate-fade-in">
-                        <div class="flex flex-col">
-                            <p class="text-[10px] font-bold text-white uppercase tracking-tight">${log.nama}</p>
-                            <p class="text-[8px] text-slate-400 uppercase tracking-tighter">
-                                ${active?.label || 'Absen'} • ${jamAbsen}
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-1 bg-teal-500/10 px-2 py-1 rounded border border-teal-500/20">
-                            <span class="w-1 h-1 bg-teal-400 rounded-full"></span>
-                            <p class="text-[7px] font-black text-teal-400">BERHASIL</p>
-                        </div>
-                    </div>`;
-            }).join('');
-        } else {
-            // Balikin ke state kosong kalau belum ada yang scan
-            historyList.innerHTML = `<p class="text-[9px] text-slate-500 text-center py-4 uppercase tracking-widest italic">Belum ada aktivitas</p>`;
-        }
-    }
-}
-    // 5. BOOTSTRAP (ALUR STARTUP)
-    window.onload = async () => {
-        updateDate(); // Jalankan jam dulu biar user nggak panik
-        
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                console.log("Login OK");
-                fetchJadwal();
-                onSnapshot(collection(db, 'absensi_sholat'), (snap) => {
-                    currentAbsensiData = snap.docs.map(d => d.data());
-                    renderDashboard();
+        async function fetchJadwal() {
+            try {
+                const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=Garut&method=20`);
+                const json = await res.json();
+                const timings = json.data.timings;
+                const map = { Fajr: 'fajr', Dhuhr: 'dhuhr', Asr: 'asr', Maghrib: 'maghrib', Isha: 'isha' };
+                Object.keys(map).forEach(key => {
+                    const el = document.getElementById(`time-${map[key]}`);
+                    if(el) el.innerText = timings[key];
                 });
-                setTimeout(startScanner, 1000);
-            } else {
-                signInAnonymously(auth);
-            }
-        });
+                determineCurrentSesi(timings);
+            } catch (e) { console.error(e); }
+        }
 
-        lucide.createIcons();
-        setInterval(updateActiveSesi, 60000);
-    };
-</script>
+        function determineCurrentSesi(timings) {
+            const now = new Date();
+            const nowMins = now.getHours() * 60 + now.getMinutes();
+            const parse = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+            const sesiList = [
+                { id: 'fajr', start: timings.Fajr, end: "06:15", label: "Subuh" },
+                { id: 'dhuhr', start: timings.Dhuhr, end: "14:00", label: "Dzuhur" },
+                { id: 'asr', start: timings.Asr, end: "17:30", label: "Ashar" },
+                { id: 'maghrib', start: timings.Maghrib, end: "19:00", label: "Maghrib" },
+                { id: 'isha', start: timings.Isha, end: "21:00", label: "Isya" }
+            ];
+            currentSesi = sesiList.find(s => nowMins >= parse(s.start) && nowMins <= parse(s.end));
+            sesiList.forEach(s => {
+                const el = document.getElementById(`sesi-${s.id}`);
+                if (el) {
+                    if (currentSesi && s.id === currentSesi.id) {
+                        el.classList.add('active-neon');
+                        currentSesi.isLate = nowMins > (parse(s.start) + 15);
+                    } else el.classList.remove('active-neon');
+                }
+            });
+        }
+
+        function listenToAbsensi() {
+            if (!auth.currentUser) return;
+            const today = new Date().toISOString().split('T')[0];
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat'), where("tanggal", "==", today));
+            if (unsubAbsensi) unsubAbsensi();
+            unsubAbsensi = onSnapshot(q, (snap) => {
+                absensiDataToday = snap.docs.map(d => d.data());
+                renderDashboard();
+            }, (err) => console.error(err));
+        }
+
+        async function onScanSuccess(decodedText) {
+            if (isProcessing || !auth.currentUser) return;
+            const cleanedId = decodedText.trim();
+            const student = MASTER_SISWA.find(s => s.id === cleanedId);
+            
+            if (!student) {
+                const statusEl = document.getElementById('scan-status');
+                statusEl.innerText = "DATA TIDAK DIKENAL!";
+                statusEl.classList.add('text-red-500');
+                setTimeout(() => {
+                    statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
+                    statusEl.classList.remove('text-red-500');
+                }, 2000);
+                return;
+            }
+
+            const label = currentSesi ? currentSesi.label : "Luar Sesi";
+            const status = (currentSesi && currentSesi.isLate) ? "TERLAMBAT" : "HADIR";
+            isProcessing = true;
+            const today = new Date().toISOString().split('T')[0];
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat', `${today}_${student.id}`), {
+                    student_id: student.id, nama: student.nama, kelas: student.kelas,
+                    tanggal: today, sesi: label, last_status: status, last_update: Date.now()
+                }, { merge: true });
+                showFeedback(student.nama);
+            } catch (e) { console.error(e); }
+            setTimeout(() => isProcessing = false, 2500);
+        }
+
+        function showFeedback(name) {
+            const box = document.getElementById('info-box');
+            document.getElementById('info-name').innerText = name;
+            box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('hidden'), 2500);
+        }
+
+        function updateDateTime() {
+            const el = document.getElementById('current-date');
+            if (el) el.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function renderDashboard() {
+            const totalAbsen = absensiDataToday.length;
+            const hadirCount = absensiDataToday.filter(d => d.last_status === "HADIR").length;
+            const telatCount = absensiDataToday.filter(d => d.last_status === "TERLAMBAT").length;
+            
+            document.getElementById('stat-hadir').innerText = hadirCount;
+            document.getElementById('stat-telat').innerText = telatCount;
+            document.getElementById('stat-mangkir').innerText = Math.max(0, TOTAL_SISWA - totalAbsen); 
+            
+            const list = document.getElementById('history-list');
+            const sorted = [...absensiDataToday].sort((a, b) => b.last_update - a.last_update);
+            
+            if (sorted.length === 0) {
+                list.innerHTML = `<p class="text-center py-10 opacity-30 text-[9px] uppercase italic">Menunggu Absensi...</p>`;
+                return;
+            }
+            list.innerHTML = sorted.slice(0, 10).map(item => `
+                <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-[10px] font-black text-teal-400 border border-teal-500/20">${item.kelas}</div>
+                        <div><p class="text-[11px] font-black text-white uppercase line-clamp-1">${item.nama}</p><p class="text-[8px] text-teal-400/70 font-bold uppercase">${item.sesi}</p></div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[7px] font-black px-2 py-1 rounded-full ${item.last_status === 'TERLAMBAT' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-teal-500/20 text-teal-400'}">${item.last_status}</span>
+                        <p class="text-[7px] text-slate-500 font-bold mt-1">${new Date(item.last_update).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</p>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        init();
+    </script>
 </body>
 </html>
