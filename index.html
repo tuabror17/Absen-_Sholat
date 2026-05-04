@@ -135,7 +135,7 @@
     <div class="absolute inset-0 bg-black/20 pointer-events-none z-10 flex items-center justify-center">
         <!-- Kotak Fokus (Ukuran disesuaikan biar pas sama QRbox kodingan) -->
         <div class="w-[280px] h-[280px] border-2 border-teal-500/50 rounded-[2.5rem] relative overflow-hidden bg-transparent shadow-[0_0_0_999px_rgba(0,0,0,0.4)]">
-            <div class="scan-anim"></div>
+           
             <div class="absolute bottom-6 left-0 right-0 text-center">
                 <p id="scan-status" class="text-[10px] text-white font-black uppercase tracking-[0.4em] drop-shadow-lg">Siap Pindai QR</p>
             </div>
@@ -165,13 +165,13 @@
 </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const firebaseConfigRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-        const firebaseConfig = firebaseConfigRaw ? JSON.parse(firebaseConfigRaw) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfigRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+    const firebaseConfig = firebaseConfigRaw ? JSON.parse(firebaseConfigRaw) : {};
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         // TOTAL SISWA UPDATE JADI 137 SESUAI DATA IKHWAN
         const TOTAL_SISWA = 137;
@@ -331,11 +331,11 @@
     ]
 };
 
-        let db, auth, scanner;
-        let isProcessing = false;
-        let currentSesi = null;
-        let absensiDataToday = [];
-        let unsubAbsensi = null;
+      let db, auth, scanner;
+    let isProcessing = false;
+    let currentSesi = null;
+    let absensiDataToday = [];
+    let unsubAbsensi = null;
 
         window.openResetModal = () => document.getElementById('reset-modal').classList.remove('hidden');
         window.closeResetModal = () => document.getElementById('reset-modal').classList.add('hidden');
@@ -355,48 +355,34 @@
             } catch (err) { console.error(err); }
         };
 
-        window.startScanner = async () => {
+      window.startScanner = async () => {
     const statusEl = document.getElementById('scan-status');
-    const actionOverlay = document.getElementById('action-overlay');
-    const readerEl = document.getElementById('reader');
-
-    if (!readerEl) {
-        alert("Elemen 'reader' gak ketemu, Broo!");
-        return;
-    }
+    const container = document.getElementById('reader');
+    const actionOverlay = document.getElementById('action-overlay'); // Pastikan ini ada
 
     try {
-        statusEl.innerText = "MINTA IZIN KAMERA...";
-
-        // 1. Matikan scanner lama & BERSIHKAN elemen (PENTING!)
         if (scanner) {
-            try { 
-                await scanner.stop(); 
-                scanner.clear(); // Hapus sisa UI scanner sebelumnya
-            } catch(e) {
-                console.log("Scanner emang belum jalan atau udah stop.");
-            }
+            try { await scanner.stop(); } catch (e) {}
+            scanner.clear();
         }
 
-        // 2. Inisialisasi ulang
+        container.innerHTML = ""; 
         scanner = new Html5Qrcode("reader");
 
-        // 3. Konfigurasi (Gue saranin qrbox jangan terlalu kaku)
-       const config = { 
-    fps: 15, 
-    qrbox: { width: 280, height: 280 }, // Sesuaikan sama ukuran div di atas
-    aspectRatio: 1.0,
-    disableFlip: false 
-};
+        const config = { 
+            fps: 15, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        };
 
-await scanner.start(
-    { facingMode: "environment" }, 
-    config, 
-    onScanSuccess
-);
+        await scanner.start(
+            { facingMode: "environment" }, 
+            config, 
+            onScanSuccess
+        );
 
-        // 5. Update UI kalau sukses
-        actionOverlay.classList.add('hidden');
+        // Update UI Sukses
+        if (actionOverlay) actionOverlay.classList.add('hidden');
         statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
         console.log("Gaspol, Abu Kia! Scanner is Ready.");
 
@@ -404,7 +390,6 @@ await scanner.start(
         console.error("Kamera Error:", err);
         statusEl.innerText = "KAMERA GAGAL!";
         
-        // Cek error spesifik (seringnya karena HTTPS atau Izin)
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
             alert("Scanner butuh HTTPS, Broo! Browser gak bakal kasih izin kamera di HTTP biasa.");
         } else {
@@ -412,17 +397,15 @@ await scanner.start(
         }
     }
 };
-        window.exportToExcel = () => {
-    // 1. Pastikan absensiDataToday diconvert ke Array dulu
-    const dataArray = Array.isArray(absensiDataToday) ? absensiDataToday : Object.values(absensiDataToday || {});
-
-    if (dataArray.length === 0) {
+       window.exportToExcel = () => {
+    // 1. Validasi Masalah: Langsung pakai absensiDataToday karena sudah di-map jadi array di listener
+    if (!absensiDataToday || absensiDataToday.length === 0) {
         alert("Belum ada data absensi untuk diekspor hari ini, Broo!");
         return;
     }
 
-    // 2. Formatting data (diurutkan dari yang terbaru)
-    const formatData = dataArray
+    // 2. Analisis: Formatting & Sorting (Terbaru di atas)
+    const formatData = [...absensiDataToday] // Clone array biar gak mutasi data asli
         .sort((a, b) => (b.last_update || 0) - (a.last_update || 0))
         .map((row, idx) => ({
             "No": idx + 1, 
@@ -433,45 +416,68 @@ await scanner.start(
             "Waktu Absen": row.last_update ? new Date(row.last_update).toLocaleTimeString('id-ID') : "-"
         }));
 
-    // 3. Eksekusi Export
+    // 3. Verifikasi & Eksekusi Export
     try {
+        // Pastikan library XLSX sudah ke-load (script cdn di head)
+        if (typeof XLSX === 'undefined') {
+            throw new Error("Library XLSX belum ter-load!");
+        }
+
         const ws = XLSX.utils.json_to_sheet(formatData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Absensi");
         
-        const fileName = `Absensi_Sholat_${new Date().toISOString().split('T')[0]}.xlsx`;
+        const dateStr = new Date().toLocaleDateString('id-ID').replace(/\//g, '-');
+        const fileName = `Absensi_Sholat_${dateStr}.xlsx`;
+        
         XLSX.writeFile(wb, fileName);
+        console.log("Export Berhasil, Broo!");
+
     } catch (error) {
         console.error("Gagal export Excel:", error);
-        alert("Library Excel (XLSX) belum terpasang atau ada error di script!");
+        alert("Gagal export! Pastikan koneksi aman dan library XLSX sudah terpasang.");
     }
 };
 
 function determineCurrentSesi(timings) {
     const now = new Date();
     const nowMins = now.getHours() * 60 + now.getMinutes();
+    
     const parse = (t) => { 
         if(!t) return 0;
+        // Handle format HH:mm (beberapa API kasih format beda)
         const [h, m] = t.split(':').map(Number); 
         return h * 60 + m; 
     };
 
+    // Solusi: End time otomatis diambil dari awal waktu sholat berikutnya
     const sesiList = [
-        { id: 'fajr', start: timings.Fajr, end: "06:15", label: "Subuh" },
-        { id: 'dhuhr', start: timings.Dhuhr, end: "14:00", label: "Dzuhur" },
-        { id: 'asr', start: timings.Asr, end: "17:30", label: "Ashar" },
-        { id: 'maghrib', start: timings.Maghrib, end: "19:00", label: "Maghrib" },
-        { id: 'isha', start: timings.Isha, end: "21:00", label: "Isya" }
+        { id: 'fajr', start: timings.Fajr, end: timings.Dhuhr, label: "Subuh", limit: 60 }, // Limit 60 min
+        { id: 'dhuhr', start: timings.Dhuhr, end: timings.Asr, label: "Dzuhur", limit: 45 },
+        { id: 'asr', start: timings.Asr, end: timings.Maghrib, label: "Ashar", limit: 45 },
+        { id: 'maghrib', start: timings.Maghrib, end: timings.Isha, label: "Maghrib", limit: 30 },
+        { id: 'isha', start: timings.Isha, end: "23:59", label: "Isya", limit: 45 }
     ];
 
-    currentSesi = sesiList.find(s => nowMins >= parse(s.start) && nowMins <= parse(s.end));
+    // Cari sesi yang aktif sekarang
+    const active = sesiList.find(s => nowMins >= parse(s.start) && nowMins < parse(s.end));
     
+    if (active) {
+        // Update global currentSesi (pastikan let currentSesi sudah ada di luar fungsi)
+        currentSesi = { 
+            ...active, 
+            isLate: nowMins > (parse(active.start) + 15) // Toleransi 15 menit
+        };
+    } else {
+        currentSesi = null;
+    }
+    
+    // UI Update: Verifikasi elemen neon
     sesiList.forEach(s => {
         const el = document.getElementById(`sesi-${s.id}`);
         if (el) {
             if (currentSesi && s.id === currentSesi.id) {
                 el.classList.add('active-neon');
-                currentSesi.isLate = nowMins > (parse(s.start) + 15);
             } else {
                 el.classList.remove('active-neon');
             }
@@ -480,59 +486,78 @@ function determineCurrentSesi(timings) {
 }
 
 const init = async () => {
-    if (Object.keys(firebaseConfig).length === 0) return;
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
+    // 1. Validasi Config
+    if (Object.keys(firebaseConfig).length === 0) {
+        console.error("Firebase config kosong, Broo!");
+        return;
+    }
 
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+    try {
+        // 2. Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
 
-    // PANGGIL DI SINI BIAR PASTI JALAN PAS APP START
-    await fetchJadwal(); 
+        // 3. UI Standby & Jadwal
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // Load jadwal duluan biar currentSesi siap
+        await fetchJadwal(); 
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // fetchJadwal(); // Ini bisa lo hapus biar gak manggil dua kali
-            listenToAbsensi();
-        } else if (unsubAbsensi) unsubAbsensi();
-    });
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) { console.error(err); }
+        // 4. Auth & Listener Setup
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Authenticated as:", user.uid);
+                listenToAbsensi();
+            } else {
+                if (unsubAbsensi) unsubAbsensi();
+            }
+        });
 
-            lucide.createIcons();
-        };
+        // 5. Trigger Sign-In
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+            await signInAnonymously(auth);
+        }
 
-        async function fetchJadwal() {
+        // 6. Final Touch
+        lucide.createIcons();
+        console.log("App Initialized Successfully, Abu Kia!");
+
+    } catch (err) {
+        console.error("Initialization Failed:", err);
+        alert("Gagal koneksi ke server, coba refresh halaman!");
+    }
+};
+
+       let globalTimings = null; 
+
+async function fetchJadwal() {
     try {
         const today = new Date();
         const y = today.getFullYear();
         const m = today.getMonth() + 1;
         const d = today.getDate();
 
-        // Pakai API myQuran (Data Kemenag RI untuk Garut ID: 1205)
+        // 1. Fetch API
         const res = await fetch(`https://api.myquran.com/v2/sholat/jadwal/1205/${y}/${m}/${d}`);
         const json = await res.json();
         
-        if (!json.status) throw new Error("API Down, Broo!");
+        if (!json.status) throw new Error("API myQuran bermasalah!");
 
         const jadwal = json.data.jadwal;
-        // Maping data API ke ID elemen di HTML lo
-        // Sesuaikan key (subuh, dzuhur, dll) dengan yang ada di UI
         const map = { subuh: 'fajr', dzuhur: 'dhuhr', ashar: 'asr', maghrib: 'maghrib', isya: 'isha' };
         
+        // 2. Update UI Jadwal
         Object.keys(map).forEach(key => {
             const el = document.getElementById(`time-${map[key]}`);
             if(el) el.innerText = jadwal[key];
         });
 
-        // Teruskan data ke logic sesi (Ubah format key biar cocok sama determineCurrentSesi)
-        const timingsForSesi = {
+        // 3. Simpan ke Global buat re-use
+        globalTimings = {
             Fajr: jadwal.subuh,
             Dhuhr: jadwal.dzuhur,
             Asr: jadwal.ashar,
@@ -540,132 +565,236 @@ const init = async () => {
             Isha: jadwal.isya
         };
 
-        determineCurrentSesi(timingsForSesi);
-        console.log("Jadwal Kemenag Terupdate: ", jadwal.tanggal);
+        determineCurrentSesi(globalTimings);
+        console.log("Jadwal Berhasil Disinkronkan, Broo!");
+
     } catch (e) { 
-        console.error("Gagal Fetch Jadwal:", e);
+        console.error("Fetch Jadwal Gagal:", e);
+        // Fallback: Kasih info ke user di status scan
+        const statusEl = document.getElementById('scan-status');
+        if (statusEl) statusEl.innerText = "GAGAL LOAD JADWAL!";
     }
 }
 
-        function listenToAbsensi() {
-            if (!auth.currentUser) return;
-            const today = new Date().toISOString().split('T')[0];
-            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat'), where("tanggal", "==", today));
-            if (unsubAbsensi) unsubAbsensi();
-            unsubAbsensi = onSnapshot(q, (snap) => {
-                absensiDataToday = snap.docs.map(d => d.data());
-                renderDashboard();
-            }, (err) => console.error(err));
-        }
+function listenToAbsensi() {
+    if (!auth.currentUser) return;
 
-  async function onScanSuccess(decodedText) {
-    // 1. LOCK! Jangan kasih kendor
-    if (isProcessing || !auth?.currentUser) return;
-    isProcessing = true; 
+    // Gunakan tanggal lokal agar sinkron dengan data hari ini
+    const today = new Date().toISOString().split('T')[0];
+    const q = query(
+        collection(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat'), 
+        where("tanggal", "==", today)
+    );
 
-    // 2. Bersihin data (Buang spasi & karakter aneh)
-    const cleanedId = String(decodedText).trim();
-    let student = null;
-    let studentKelas = "";
+    if (unsubAbsensi) unsubAbsensi();
+    
+    unsubAbsensi = onSnapshot(q, (snap) => {
+        // 4. Transform data & Sortir dari yang terbaru buat dashboard
+        absensiDataToday = snap.docs.map(d => d.data());
+        console.log(`Update: ${absensiDataToday.length} siswa diabsen.`);
+        renderDashboard();
+    }, (err) => {
+        console.error("Firebase Snapshot Error:", err);
+    });
+}
 
-    const statusEl = document.getElementById('scan-status');
-    if (statusEl) statusEl.innerText = "MENCARI DATA...";
+const LAT = -7.1852; 
+const LON = 107.8920;
+const METHOD = 11; // Method 11 = Kemenag RI / Majelis Tarjih Muhammadiyah
 
-    // 3. Cari student (Pake String() biar pasti matching sama MASTER_SISWA)
-    for (const kelas in MASTER_SISWA) {
-        // Bandingkan String ke String biar gak meleset
-        const found = MASTER_SISWA[kelas].find(s => String(s.id).trim() === cleanedId);
-        if (found) {
-            student = found;
-            studentKelas = kelas;
-            break;
-        }
+async function getJadwalAladhan() {
+    try {
+        // 1. Validasi Masalah: Tembak koordinat Tarogong Kaler
+        const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${LAT}&longitude=${LON}&method=${METHOD}`);
+        const result = await response.json();
+        
+        if (result.code !== 200) throw new Error("API Aladhan Down!");
+        
+        const t = result.data.timings;
+
+        // 2. Analisis: Mapping ke globalTimings (samain strukturnya)
+        globalTimings = {
+            Fajr: t.Fajr,
+            Dhuhr: t.Dhuhr,
+            Asr: t.Asr,
+            Maghrib: t.Maghrib,
+            Isha: t.Isha
+        };
+
+        // 3. Update UI (waktu sholat yang tampil di panel kiri)
+        const uiMap = { Fajr: 'fajr', Dhuhr: 'dhuhr', Asr: 'asr', Maghrib: 'maghrib', Isha: 'isha' };
+        Object.keys(uiMap).forEach(key => {
+            const el = document.getElementById(`time-${uiMap[key]}`);
+            if (el) el.innerText = t[key];
+        });
+
+        // 4. Sinkronisasi Sesi
+        determineCurrentSesi(globalTimings);
+        
+        console.log("Jadwal Aladhan Tarogong Kaler Sinkron!", globalTimings);
+
+    } catch (error) {
+        console.error("Gagal sinkron Aladhan:", error);
+        // Fallback Data
+        globalTimings = { Fajr: "04:35", Dhuhr: "11:50", Asr: "15:10", Maghrib: "17:55", Isha: "19:05" };
+        determineCurrentSesi(globalTimings);
+    }
+}
+
+async function executeAbsensiSholat(id, jenisSholat) {
+    // 1. Validasi Masalah: Cek data siswa di local array
+    const dataSiswa = arraySiswa.find(s => s.id === id);
+    if (!dataSiswa) {
+        showMessage("ID Tidak Terdaftar!", "bg-red-500");
+        return;
     }
 
-    // Jika ID Gak Ketemu
+    try {
+        // 2. Analisis: Siapkan payload sesuai schema listener lo
+        const today = new Date().toISOString().split('T')[0];
+        const timestampNow = Date.now();
+
+        const payload = {
+            nama: dataSiswa.nama,
+            kelas: dataSiswa.kelas,
+            sesi: jenisSholat, // Sesuaikan field name dengan UI (Subuh, Dzuhur, dll)
+            last_status: currentSesi?.isLate ? "TERLAMBAT" : "TEPAT WAKTU",
+            last_update: timestampNow,
+            tanggal: today, // WAJIB ADA buat query listener
+            pukul: new Date().toLocaleTimeString('id-ID')
+        };
+
+        // 3. Eksekusi: Masukin ke sub-collection Firestore yang bener
+        const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat');
+        
+        // Pake setDoc dengan ID custom (misal: ID_SISWA + TANGGAL + SESI) 
+        // biar gak ada absen ganda di sesi yang sama
+        const docId = `${id}_${today}_${jenisSholat.toLowerCase()}`;
+        await setDoc(doc(colRef, docId), payload);
+
+        showMessage(`${dataSiswa.nama} Berhasil Absen ${jenisSholat}!`, "bg-green-600");
+        console.log("Gaspol, Abu Kia! Data masuk Firestore.");
+
+    } catch (error) {
+        console.error("Gagal Absen:", error);
+        showMessage("Gagal simpan data!", "bg-red-600");
+    }
+}
+
+// 1. Fungsi cari siswa yang lebih aman
+const findStudent = (id) => {
+    const cleanedId = id.toString().replace(/^0+/, ''); 
+    for (const kelas in MASTER_SISWA) {
+        const student = MASTER_SISWA[kelas].find(s => 
+            s.id.toString().replace(/^0+/, '') === cleanedId
+        );
+        if (student) return { ...student, kelas };
+    }
+    return null;
+};
+
+// 2. Logic Scanner (Biasanya di dalam onScanSuccess)
+const onScanSuccess = async (decodedText) => {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    const student = findStudent(decodedText);
+    const statusEl = document.getElementById('scan-status');
+
+    // Cek ID
     if (!student) {
-        console.warn("ID Tidak Terdaftar:", cleanedId);
-        if (statusEl) statusEl.innerText = `ID ${cleanedId} TIDAK DIKENAL!`;
+        console.warn("ID Tidak Terdaftar:", decodedText);
+        if (statusEl) statusEl.innerText = `ID ${decodedText} TIDAK DIKENAL!`;
         setTimeout(() => { isProcessing = false; }, 2000);
         return;
     }
 
-    // 4. Sesi & Status
-    const label = (currentSesi) ? currentSesi.label : "Luar Sesi";
-    const status = (currentSesi?.isLate) ? "TERLAMBAT" : "HADIR";
+    // Cek Sesi Sholat (Ambil dari global currentSesi yang sudah kita buat tadi)
+    if (!currentSesi) {
+        if (statusEl) statusEl.innerText = "BELUM MASUK WAKTU SHOLAT!";
+        setTimeout(() => { isProcessing = false; }, 2000);
+        return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
+    const status = currentSesi.isLate ? "TERLAMBAT" : "HADIR";
     
     try {
-        // 5. Push ke Firebase
-        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat', `${today}_${student.id}`), {
+        // 3. ID Dokumen Unik: tanggal_id_sesi (Biar gak ketimpa sesi sebelumnya)
+        const docId = `${today}_${student.id}_${currentSesi.id}`;
+        
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'absensi_sholat', docId), {
             student_id: student.id,
             nama: student.nama,
-            kelas: studentKelas,
+            kelas: student.kelas,
             tanggal: today,
-            sesi: label,
+            sesi: currentSesi.label,
             last_status: status,
             last_update: Date.now()
         }, { merge: true });
 
-        if (statusEl) statusEl.innerText = `BERHASIL: ${student.nama}`;
-        showFeedback(student.nama);
+        if (statusEl) statusEl.innerText = `BERHASIL: ${student.nama} (${status})`;
+        // Panggil fungsi feedback (suara/animasi)
+        if (typeof showFeedback === 'function') showFeedback(student.nama);
 
     } catch (e) { 
         console.error("Firebase Error:", e);
         if (statusEl) statusEl.innerText = "ERROR DATABASE!"; 
     } finally {
-        // 6. Jeda 3 detik baru bisa scan lagi
+        // 4. Jeda biar gak double scan
         setTimeout(() => { 
             isProcessing = false; 
             if (statusEl) statusEl.innerText = "KAMERA AKTIF - SIAP PINDAI";
         }, 3000);
     }
-}
+};
 
-        function showFeedback(name) {
-            const box = document.getElementById('info-box');
-            document.getElementById('info-name').innerText = name;
-            box.classList.remove('hidden');
-            setTimeout(() => box.classList.add('hidden'), 2500);
-        }
+       function renderDashboard() {
+    // 1. Filter data hanya untuk SESI yang aktif sekarang (biar statistik gak campur)
+    const activeLabel = currentSesi ? currentSesi.label : null;
+    const dataSesiIni = activeLabel 
+        ? absensiDataToday.filter(d => d.sesi === activeLabel)
+        : [];
 
-        function updateDateTime() {
-            const el = document.getElementById('current-date');
-            if (el) el.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        }
+    // 2. Hitung Statistik Berdasarkan Sesi Aktif
+    const hadirCount = dataSesiIni.filter(d => d.last_status === "HADIR").length;
+    const telatCount = dataSesiIni.filter(d => d.last_status === "TERLAMBAT").length;
+    const totalAbsenSesiIni = dataSesiIni.length;
 
-        function renderDashboard() {
-            const totalAbsen = absensiDataToday.length;
-            const hadirCount = absensiDataToday.filter(d => d.last_status === "HADIR").length;
-            const telatCount = absensiDataToday.filter(d => d.last_status === "TERLAMBAT").length;
-            
-            document.getElementById('stat-hadir').innerText = hadirCount;
-            document.getElementById('stat-telat').innerText = telatCount;
-            document.getElementById('stat-mangkir').innerText = Math.max(0, TOTAL_SISWA - totalAbsen); 
-            
-            const list = document.getElementById('history-list');
-            const sorted = [...absensiDataToday].sort((a, b) => b.last_update - a.last_update);
-            
-            if (sorted.length === 0) {
-                list.innerHTML = `<p class="text-center py-10 opacity-30 text-[9px] uppercase italic">Menunggu Absensi...</p>`;
-                return;
-            }
-            list.innerHTML = sorted.slice(0, 10).map(item => `
-                <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-[10px] font-black text-teal-400 border border-teal-500/20">${item.kelas}</div>
-                        <div><p class="text-[11px] font-black text-white uppercase line-clamp-1">${item.nama}</p><p class="text-[8px] text-teal-400/70 font-bold uppercase">${item.sesi}</p></div>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[7px] font-black px-2 py-1 rounded-full ${item.last_status === 'TERLAMBAT' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-teal-500/20 text-teal-400'}">${item.last_status}</span>
-                        <p class="text-[7px] text-slate-500 font-bold mt-1">${new Date(item.last_update).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</p>
-                    </div>
+    // Update UI Stat
+    const elHadir = document.getElementById('stat-hadir');
+    const elTelat = document.getElementById('stat-telat');
+    const elMangkir = document.getElementById('stat-mangkir');
+
+    if (elHadir) elHadir.innerText = hadirCount;
+    if (elTelat) elTelat.innerText = telatCount;
+    if (elMangkir) elMangkir.innerText = Math.max(0, TOTAL_SISWA - totalAbsenSesiIni);
+    
+    // 3. History List: Tetap tampilkan semua sesi (biar keren diliat)
+    const list = document.getElementById('history-list');
+    const sorted = [...absensiDataToday].sort((a, b) => b.last_update - a.last_update);
+    
+    if (sorted.length === 0) {
+        list.innerHTML = `<p class="text-center py-10 opacity-30 text-[9px] uppercase italic">Menunggu Absensi...</p>`;
+        return;
+    }
+
+    list.innerHTML = sorted.slice(0, 10).map(item => `
+        <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 animate-fade-in">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-[10px] font-black text-teal-400 border border-teal-500/20">${item.kelas}</div>
+                <div>
+                    <p class="text-[11px] font-black text-white uppercase line-clamp-1">${item.nama}</p>
+                    <p class="text-[8px] text-teal-400/70 font-bold uppercase">${item.sesi}</p>
                 </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        init();
+            </div>
+            <div class="text-right">
+                <span class="text-[7px] font-black px-2 py-1 rounded-full ${item.last_status === 'TERLAMBAT' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-teal-500/20 text-teal-400'}">${item.last_status}</span>
+                <p class="text-[7px] text-slate-500 font-bold mt-1">${new Date(item.last_update).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</p>
+            </div>
+        </div>
+    `).join('');
+}
 
     </script>
 </body>
